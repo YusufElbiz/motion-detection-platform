@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090520"><meta name="description" content="İki kişi, tek kamera, hareketle oynanan Human Tetris oyunu"><title>HUMAN TETRIS // SOLO + DUO</title></head>
+<body>
+<div id="app">
+  <div class="bg-grid"></div><div class="glow glow-a"></div><div class="glow glow-b"></div>
+  <header class="app-header">
+    <a class="logo" href="#" id="home" aria-label="Ana ekran"><span class="logo-sign">H<span>T</span></span><span class="logo-word">HUMAN TETRIS<small>SOLO + DUO CHALLENGE</small></span></a>
+    <div class="header-mid"><span class="live-dot"></span><span id="mode-header">TEK KİŞİ · TEK KAMERA</span></div>
+    <div class="header-actions"><button id="audio" class="icon-btn" title="Sesi aç/kapat" aria-label="Sesi aç/kapat">♫</button><button id="info" class="icon-btn" aria-label="Yardım">?</button></div>
+  </header>
+  <section class="dashboard">
+    <div class="stat"><span class="stat-label">BÖLÜM</span><strong id="round">01 <span>/ 16</span></strong></div>
+    <div class="stat"><span class="stat-label">PUAN</span><strong id="score">0000</strong></div>
+    <div class="stat"><span class="stat-label">ÇARPIŞMA</span><strong id="hits">00</strong></div>
+    <div class="stat stat-phase"><span class="stat-label">DUVAR DURUMU</span><strong id="phase">HAZIR</strong></div>
+  </section>
+  <main class="layout">
+    <section class="arena-panel" id="arena-panel">
+      <div class="panel-top"><div><span class="eyebrow">01 / ARENA</span><h2>DUVARA UYUM SAĞLA<span>.</span></h2></div><div class="arena-tools"><span class="arena-indicator">● LIVE ARENA</span><button id="fullscreen-btn" class="fullscreen-btn" title="Hareket ekranını büyüt (F)" aria-pressed="false">⛶ BÜYÜK EKRAN</button></div></div>
+      <div class="challenge-banner"><span id="challenge-level" class="challenge-level fun">EĞLENCELİ</span><strong id="challenge-title">YILDIZ POZU</strong><span id="duo-state" class="duo-state" hidden></span></div>
+      <div id="arena" class="arena">
+        <div class="arena-tunnel"><div class="tunnel-lines"></div><div class="tunnel-ceiling"></div><div class="tunnel-floor"></div><div class="tunnel-center"></div><span class="laser laser-l"></span><span class="laser laser-r"></span></div>
+        <div class="arena-ambient"><span class="spark" style="--x:17%;--y:24%"></span><span class="spark" style="--x:83%;--y:30%"></span><span class="spark" style="--x:66%;--y:12%"></span></div>
+        <div id="wall-wrap" class="wall-wrap"><div class="wall-rail top"></div><div class="wall-rail bottom"></div><canvas id="wall" aria-label="Tek oyuncunun vermesi gereken pozun bulunduğu duvar"></canvas></div>
+        <div id="impact" class="impact" aria-hidden="true"></div>
+        <div class="players-head"><span class="pill pill-p1">01 <b id="p1-label">OYUNCU 1</b></span><span class="pill pill-p2" id="p2-pill" hidden>02 <b id="p2-label">OYUNCU 2</b></span></div>
+        <div class="stage-footer"><span id="stage-msg">Kamerayı aç ve oyuna hazırlan.</span><span class="stage-timer" id="wall-distance">—</span></div>
+      </div>
+      <div class="arena-bottom"><div class="how-icon">⌁</div><p id="mode-description">Duvar geldiğinde silüetteki pozu ver. Yanlışsa geri seker; aynı bölüm tekrar edilir.</p></div>
+    </section>
+    <aside class="side-panel">
+      <div class="cam-panel"><div class="panel-heading"><div><span class="eyebrow">02 / VÜCUT TAKİBİ</span><h3>CANLI KAMERA</h3></div><span id="camera-dot" class="camera-status">KAPALI</span></div>
+        <div class="camera-window"><video id="webcam" autoplay playsinline muted></video><canvas id="pose-preview"></canvas><div class="camera-cross"></div><div id="camera-empty" class="camera-empty"><div class="camera-emblem">⌾</div><strong>KAMERA BAĞLI DEĞİL</strong><small id="camera-instruction">Bütün vücudun kadrajda olmalı</small></div></div>
+        <div class="hold-box"><div class="hold-title"><span>DOĞRU POZ SÜRESİ</span><strong id="hold-progress">POZU TUT: 0%</strong></div><div class="hold-track"><div id="hold-bar"></div></div></div><div id="camera-message" class="camera-message" role="status">Kamera için localhost veya HTTPS gerekiyor.</div><div class="pose-legend"><span><b class="lg good"></b>Doğru</span><span><b class="lg warn"></b>Yakın</span><span><b class="lg bad"></b>Yanlış</span></div>
+      </div>
+      <div class="checks"><div class="check-card p1"><div class="check-head"><span>01</span><strong id="p1-card-name">OYUNCU 1</strong><span id="p1-state" class="check-state">BEKLENİYOR</span></div><div class="check-bar"><div id="p1-bar"></div></div><div class="check-foot"><span id="p1-tip">Kamera bekleniyor</span><strong id="p1-percent">—</strong></div></div>
+      <div class="check-card p2" id="p2-card" hidden><div class="check-head"><span>02</span><strong>OYUNCU 2 · SAĞ</strong><span id="p2-state" class="check-state">BEKLENİYOR</span></div><div class="check-bar"><div id="p2-bar"></div></div><div class="check-foot"><span id="p2-tip">Kamera bekleniyor</span><strong id="p2-percent">—</strong></div></div></div>
+      <div class="control-panel"><span class="eyebrow">03 / KONTROLLER</span><div class="mode-switch" aria-label="Oyun modu"><button id="solo-mode" type="button" class="mode-btn selected">◉ TEK KİŞİ</button><button id="duo-mode" type="button" class="mode-btn">◎ İKİ KİŞİ</button></div><label class="select-wrap">ZORLUK <select id="difficulty"><option value="easy">Başlangıç</option><option selected value="normal">Normal</option><option value="hard">Hassas</option></select></label><label class="select-wrap">MODEL <select id="model"><option value="full" selected>Full · Hassas</option><option value="lite">Lite · Hızlı</option></select></label><label class="range-wrap"><span>EKLEM HASSASİYETİ (SAĞA = DAHA ZOR)</span><input type="range" id="precision" min="0.65" max="1.35" step="0.05" value="1"><b id="precision-label">1.00×</b></label><button id="camera-btn" class="btn btn-outline"><span>◉</span><span>KAMERAYI AÇ</span></button><button id="start-btn" disabled class="btn btn-primary"><span>OYUNU BAŞLAT</span><span>↗</span></button><button id="demo-btn" class="small-link">Kamerasız arayüz denemesi ↗</button><button id="reset-btn" hidden class="small-link">Baştan başlat</button></div>
+    </aside>
+  </main>
+  <footer class="app-footer"><span id="footer-mode">SOLO / 16 DUVAR</span><span>POSE TRACKING · ON-DEVICE</span><span id="fps">— FPS</span></footer>
+  <div id="overlay" class="overlay"><div class="intro-card"><div class="intro-glow"></div><div class="intro-mark">HT <span>↗</span></div><div class="eyebrow">BODY CONTROLLED ARCADE EXPERIENCE</div><h1>HUMAN<br><em>TETRIS</em><span>.</span></h1><p>Tek başına veya arkadaşınla oyna. Her duvar farklı bir poz ister. Yanlış yaparsan çarpar ve yeniden gelir!</p><div class="intro-features"><span>◎ SOLO · 16 DUVAR</span><span>◎ DUO · 8 DUVAR</span><span>◉ CANLI EKLEM GERİ BİLDİRİMİ</span></div><div class="intro-modes"><button id="choose-solo" class="btn btn-primary">◉ TEK KİŞİ OYNA <span>↗</span></button><button id="choose-duo" class="btn btn-duo">◎ İKİ KİŞİ OYNA <span>↗</span></button></div><small>Kamera görüntüsü cihazınızda işlenir. Mikrofon kullanılmaz.</small></div></div>
+  <div id="help-modal" class="overlay hidden"><div class="help-card"><button id="close-help" class="close">×</button><span class="eyebrow">NASIL OYNANIR?</span><h2>DUVAR SENİ BEKLİYOR.</h2><p>Webcam'i aç. Önce tek veya iki kişilik modu seç, ardından bütün oyuncular kadraja girsin. Baş, dirsekler, bilekler, dizler ve ayak bilekleri görünsün. Ortadaki silüeti taklit et.</p><p>Algılayıcı omuz, dirsek, el bileği, kalça, diz ve ayak bileği yönlerini ayrı ayrı kontrol eder.  Doğru poz kısa süre korunmalı. Pozu yapamazsan duvar çarpar ve yeniden yaklaşır. İki kişilikte her iki oyuncu da doğru pozda kalmalı. Kamera kaybolunca başarı verilmez.</p><p><strong>Önemli:</strong> Bu oyun iskelet / eklem geometrisini eşleştirir, piksel düzeyinde gerçek vücut-duvar fizik çarpışması yapmaz. Test modu webcam doğruluğunu ölçmez.</p><button id="help-ok" class="btn btn-primary">ANLADIM <span>✓</span></button></div></div>
+</div><script type="module" src="/src/main.ts"></script>
+</body></html>
