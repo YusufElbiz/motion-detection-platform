@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="tr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#fff8e8"/><meta name="description" content="Kamera ile oynanan 1, 2 ve 3 kişilik hafıza ve ritim oyunu."/><title>Ritim Canavarı | Hareketli Hafıza Oyunu</title></head>
+<body>
+<div id="app">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <section id="welcome" class="welcome">
+    <nav class="brand-top"><div class="logo-sm"><span>♬</span> RİTİM CANAVARI</div><span class="top-note">KAMERA + HAREKET + HAFIZA</span><button class="icon-button" id="help-open" type="button" aria-label="Nasıl oynanır?">?</button></nav>
+    <main class="welcome-grid">
+      <div class="welcome-copy">
+        <div class="bubble-eyebrow"><span class="sparkle">✦</span> BERABER OYNAYALIM MI?</div>
+        <h1>RİTİM <span>CANAVARI!</span></h1>
+        <p class="welcome-lead">Hareketleri izle, aklında tut, ritme katıl! Eller birbirine karışsa da pes etmek yok.</p>
+        <div class="rules-pills"><span>🧠 HAFIZANI ÇALIŞTIR</span><span>👏 BEDENİNLE OYNA</span><span>🏆 10 SEVİYE</span></div>
+        <div class="setup">
+          <div class="setup-title"><span class="step-badge">1</span> KAÇ KİŞİ OYNAYACAK?</div>
+          <div class="count-grid" role="group" aria-label="Oyuncu sayısı">
+            <button class="count-card selected" data-count="1" type="button"><span class="count-symbol">🧒</span><b>1 OYUNCU</b><small>MAVİ ERKEK</small></button>
+            <button class="count-card" data-count="2" type="button"><span class="count-symbol">🧒👧</span><b>2 OYUNCU</b><small>MAVİ + TURKUAZ KIZ</small></button>
+            <button class="count-card" data-count="3" type="button"><span class="count-symbol">🧒👧👦</span><b>3 OYUNCU</b><small>MAVİ + KIZ + YEŞİL</small></button>
+          </div>
+          <div class="win-fixed">🏁 <strong>İLK BİTİREN KAZANIR!</strong> <span>10 ritmi ilk tamamlayan şampiyon olur.</span></div>
+          <div class="action-zone"><button id="camera-button" class="camera-main" type="button">📷 KAMERAYI AÇ</button><button id="start-button" class="start-main" type="button" disabled>OYUNA BAŞLA <span>➜</span></button></div>
+          <div class="setup-footer"><span id="camera-message">Kamera yalnızca cihazında işlenir. Çocukların tamamı kadrajda olmalı.</span><button id="test-button" class="subtle-link" type="button" disabled>Kamerasız arayüz denemesi ↗</button></div>
+          <div class="sprite-review-row"><span id="sprite-status" role="status">Karakter animasyonları yükleniyor…</span><button id="sprite-review" class="subtle-link" type="button">13 hareketi incele ↗</button></div>
+        </div>
+      </div>
+      <div class="welcome-visual">
+        <div class="stage-stars"><span>✦</span><span>★</span><span>✳</span></div>
+        <div class="sun-disc"></div>
+        <div class="monster-card"><div class="monster-horns"><i></i><i></i></div><div class="monster-eyes"><i></i><i></i></div><div class="monster-mouth"></div><div class="monster-ears"><i></i><i></i></div><div class="monster-feet"><i></i><i></i></div><span class="monster-note">♫</span></div>
+        <div class="kid-stage"><canvas id="intro-kid-0" class="intro-kid"></canvas><canvas id="intro-kid-1" class="intro-kid"></canvas><canvas id="intro-kid-2" class="intro-kid"></canvas></div>
+        <div class="visual-tag tag-one">👏 TAKLİT ET!</div><div class="visual-tag tag-two">🌈 RİTMİ YAKALA!</div>
+        <div class="floor-wave"></div>
+      </div>
+    </main>
+    <footer class="welcome-foot">10 ritim macerası · 1–3 oyuncu · Webcam ile gerçek hareket takibi</footer>
+  </section>
+  <section id="game" class="game hidden">
+    <header class="game-top"><button id="back-menu" class="exit-btn" type="button">← MENÜ</button><div class="logo-sm"><span>♬</span> RİTİM CANAVARI</div><div class="game-top-right"><div class="global-beat"><span class="pulse-dot" id="global-pulse"></span><b id="global-bpm">68 BPM</b></div><button id="audio-button" class="mini-btn" title="Sesi aç/kapat" type="button">♫ SES AÇIK</button><button id="fullscreen" class="mini-btn" title="Tam ekran" type="button">⛶ TAM EKRAN</button></div></header>
+    <div class="game-instructions"><div><span class="mini-monster">♫</span><b>ÖNCE İZLE, SONRA HATIRLA!</b><span> Hareket için 5 saniyen var; yetişemezsen aynı ritmi yeniden izle.</span></div><div id="rule-show" class="rule-bubble">İLK BİTİREN KAZANIR</div></div>
+    <div id="player-grid" class="player-grid players-1"></div>
+    <footer class="game-footer"><span><span class="green-dot"></span> Kamera görüntüsü kaydedilmez, yalnızca bilgisayarında işlenir.</span><span id="tracker-health">● Kamera bağlandı.</span></footer>
+  </section>
+  <div id="finish-overlay" class="finish-overlay hidden" role="dialog" aria-modal="true" aria-label="Oyun sonucu"><div class="finish-card"><div class="trophy">🏆</div><div class="finish-kicker">BÜTÜN RİTİMLER TAMAMLANDI!</div><h2 id="finish-title">ŞAMPİYON!</h2><p id="finish-description"></p><div id="finish-results"></div><button id="again-button" class="start-main" type="button">YENİDEN OYNA ↗</button><button id="finish-menu" class="subtle-link" type="button">ANA MENÜ</button></div></div>
+  <div id="help-overlay" class="help-overlay hidden"><div class="help-card"><button id="help-close" class="close-help" type="button">✕</button><h2>NASIL OYNANIR?</h2><p><b>1.</b> Kameranı aç ve herkesin baştan dize kadar göründüğünden emin ol.</p><p><b>2.</b> Sevimli karakter, bölümün ritim dizisini tek tek gösterecek. Hareketleri hafızanda tut.</p><p><b>3.</b> Sıra sana geldiğinde hareketleri <b>aynı sırada</b> yap. Doğru hareketi kısa süre tutman yeterli.</p><p><b>4.</b> 5 saniyede doğru hareketi yapamazsan <b>aynı ritim baştan gösterilir</b>; bölümün değişmez.</p><p><b>5.</b> 2–3 kişi aynı kamerada yan yana durur. Herkes kendi ekranında bağımsız ilerler.</p><p class="help-note">İpucu: Kameradan biraz uzaklaş, dizlerin de görünsün. Kamera izni için localhost veya HTTPS kullan.</p><button id="help-okay" class="camera-main" type="button">ANLADIM!</button></div></div>
+  <video id="webcam" autoplay playsinline muted aria-hidden="true"></video>
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body></html>

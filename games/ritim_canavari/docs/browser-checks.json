@@ -1,0 +1,236 @@
+{
+  "gestureSelections": [
+    {
+      "id": "clap",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "clap-target",
+          "move": "clap",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "cross",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "cross-target",
+          "move": "cross",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "rightShoulder",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "rightShoulder-target",
+          "move": "rightShoulder",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "leftShoulder",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "leftShoulder-target",
+          "move": "leftShoulder",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "leftHead",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "leftHead-target",
+          "move": "leftHead",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "rightHead",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "rightHead-target",
+          "move": "rightHead",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "bothKnees",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "bothKnees-target",
+          "move": "bothKnees",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "rightKnee",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "rightKnee-target",
+          "move": "rightKnee",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "leftKnee",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "leftKnee-target",
+          "move": "leftKnee",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "hips",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "hips-target",
+          "move": "hips",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "star",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "star-target",
+          "move": "star",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "rightHipLeftShoulder",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "rightHipLeftShoulder-target",
+          "move": "rightHipLeftShoulder",
+          "phase": "contact"
+        }
+      ]
+    },
+    {
+      "id": "leftHipRightShoulder",
+      "passed": true,
+      "observed": [
+        {
+          "frame": "leftHipRightShoulder-target",
+          "move": "leftHipRightShoulder",
+          "phase": "contact"
+        }
+      ]
+    }
+  ],
+  "memoryCheck": {
+    "frame": "idle",
+    "move": "idle",
+    "phase": "idle"
+  },
+  "hintCheck": {
+    "frame": "clap-source-prepare",
+    "move": "clap",
+    "phase": "return"
+  },
+  "nextStepCheck": {
+    "frame": "idle",
+    "move": "idle",
+    "phase": "idle"
+  },
+  "layoutChecks": [
+    {
+      "players": 2,
+      "lanes": 2,
+      "characters": [
+        {
+          "frame": "idle",
+          "height": 355.671875,
+          "width": 540
+        },
+        {
+          "frame": "idle",
+          "height": 355.671875,
+          "width": 540
+        }
+      ],
+      "cameras": 2
+    },
+    {
+      "players": 3,
+      "lanes": 3,
+      "characters": [
+        {
+          "frame": "idle",
+          "height": 355.671875,
+          "width": 387.40625
+        },
+        {
+          "frame": "idle",
+          "height": 355.671875,
+          "width": 387.421875
+        },
+        {
+          "frame": "idle",
+          "height": 355.671875,
+          "width": 387.40625
+        }
+      ],
+      "cameras": 3
+    },
+    {
+      "players": 1,
+      "lanes": 1,
+      "characters": [
+        {
+          "frame": "idle",
+          "height": 411.828125,
+          "width": 540
+        }
+      ],
+      "cameras": 1
+    }
+  ],
+  "independentCheck": [
+    {
+      "frame": "idle",
+      "id": "lane-0",
+      "score": "153",
+      "step": "2. hareket · doğru yapana kadar devam etmez"
+    },
+    {
+      "frame": "idle",
+      "id": "lane-1",
+      "score": "0",
+      "step": "1. hareket · doğru yapana kadar devam etmez"
+    },
+    {
+      "frame": "idle",
+      "id": "lane-2",
+      "score": "0",
+      "step": "1. hareket · doğru yapana kadar devam etmez"
+    }
+  ],
+  "webcamTested": false
+}

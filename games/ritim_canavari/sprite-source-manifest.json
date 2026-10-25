@@ -1,0 +1,20 @@
+{
+  "star": {
+    "file": "originals/star-original.png",
+    "sha256": "64d6cac910876f24ecd3dac85f09b8441035cf6c29ec309a0825cadb5503aa61",
+    "size": 1711389
+  },
+  "clap": {
+    "file": "originals/clap-original.png",
+    "sha256": "a80d1369bfa8d1753be690730cadcca109af6656770429784049a6013e03a921",
+    "size": 1563087
+  },
+  "head-hip": {
+    "file": "originals/head-hip-original.png",
+    "sha256": "527c0266e822af4ba2211a526b8ab61db251ab79cd866cb9f44448d4b3d95300",
+    "size": 1894579
+  },
+  "baseline_source": {
+    "archive": "Ritim-Canavari-Webcam-1-2-3-Kisilik-v1.1-guncel.zip"
+  }
+}

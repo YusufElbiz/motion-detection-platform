@@ -1,0 +1,314 @@
+{
+  "rightShoulder-prepare.png": {
+    "atlas": "shoulders.png",
+    "cell": [
+      0,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightShoulder-target.png": {
+    "atlas": "shoulders.png",
+    "cell": [
+      0,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftShoulder-prepare.png": {
+    "atlas": "shoulders.png",
+    "cell": [
+      1,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftShoulder-target.png": {
+    "atlas": "shoulders.png",
+    "cell": [
+      1,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "cross-prepare.png": {
+    "atlas": "shoulders.png",
+    "cell": [
+      2,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "cross-target.png": {
+    "atlas": "shoulders.png",
+    "cell": [
+      2,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftHead-prepare.png": {
+    "atlas": "head-hips.png",
+    "cell": [
+      0,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftHead-target.png": {
+    "atlas": "head-hips.png",
+    "cell": [
+      0,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightHead-prepare.png": {
+    "atlas": "head-hips.png",
+    "cell": [
+      1,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightHead-target.png": {
+    "atlas": "head-hips.png",
+    "cell": [
+      1,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "hips-prepare.png": {
+    "atlas": "head-hips.png",
+    "cell": [
+      2,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "hips-target.png": {
+    "atlas": "head-hips.png",
+    "cell": [
+      2,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "bothKnees-prepare.png": {
+    "atlas": "knees.png",
+    "cell": [
+      0,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "bothKnees-target.png": {
+    "atlas": "knees.png",
+    "cell": [
+      0,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightKnee-prepare.png": {
+    "atlas": "knees.png",
+    "cell": [
+      1,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightKnee-target.png": {
+    "atlas": "knees.png",
+    "cell": [
+      1,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftKnee-prepare.png": {
+    "atlas": "knees.png",
+    "cell": [
+      2,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftKnee-target.png": {
+    "atlas": "knees.png",
+    "cell": [
+      2,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.9,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightHipLeftShoulder-prepare.png": {
+    "atlas": "mixed-clap.png",
+    "cell": [
+      0,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.78,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "rightHipLeftShoulder-target.png": {
+    "atlas": "mixed-clap.png",
+    "cell": [
+      0,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.78,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftHipRightShoulder-prepare.png": {
+    "atlas": "mixed-clap.png",
+    "cell": [
+      1,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.78,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "leftHipRightShoulder-target.png": {
+    "atlas": "mixed-clap.png",
+    "cell": [
+      1,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.78,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "clap-prepare.png": {
+    "atlas": "mixed-clap.png",
+    "cell": [
+      2,
+      0
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.78,
+    "frame": [
+      1024,
+      1024
+    ]
+  },
+  "clap-target.png": {
+    "atlas": "mixed-clap.png",
+    "cell": [
+      2,
+      1
+    ],
+    "source_cell_size": 512,
+    "uniform_scale": 1.78,
+    "frame": [
+      1024,
+      1024
+    ]
+  }
+}

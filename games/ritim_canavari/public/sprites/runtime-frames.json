@@ -1,0 +1,422 @@
+{
+  "idle": {
+    "src": "idle.png",
+    "source": [
+      0,
+      0,
+      1024,
+      1024
+    ],
+    "destination": [
+      0,
+      0,
+      1024,
+      1024
+    ]
+  },
+  "star-target": {
+    "src": "star-target.png",
+    "source": [
+      0,
+      0,
+      1024,
+      1024
+    ],
+    "destination": [
+      0,
+      0,
+      1024,
+      1024
+    ]
+  },
+  "clap-source-prepare": {
+    "src": "clap-source-prepare.png",
+    "source": [
+      0,
+      0,
+      1024,
+      1024
+    ],
+    "destination": [
+      0,
+      0,
+      1024,
+      1024
+    ]
+  },
+  "rightShoulder-prepare": {
+    "src": "generated-atlases/shoulders.png",
+    "source": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      -92,
+      29,
+      973,
+      973
+    ]
+  },
+  "rightShoulder-target": {
+    "src": "generated-atlases/shoulders.png",
+    "source": [
+      0,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      -91,
+      39,
+      973,
+      973
+    ]
+  },
+  "leftShoulder-prepare": {
+    "src": "generated-atlases/shoulders.png",
+    "source": [
+      512,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      26,
+      27,
+      973,
+      973
+    ]
+  },
+  "leftShoulder-target": {
+    "src": "generated-atlases/shoulders.png",
+    "source": [
+      512,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      26,
+      39,
+      973,
+      973
+    ]
+  },
+  "cross-prepare": {
+    "src": "generated-atlases/shoulders.png",
+    "source": [
+      1024,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      122,
+      27,
+      973,
+      973
+    ]
+  },
+  "cross-target": {
+    "src": "generated-atlases/shoulders.png",
+    "source": [
+      1024,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      116,
+      39,
+      973,
+      973
+    ]
+  },
+  "leftHead-prepare": {
+    "src": "generated-atlases/head-hips.png",
+    "source": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      -102,
+      48,
+      973,
+      973
+    ]
+  },
+  "leftHead-target": {
+    "src": "generated-atlases/head-hips.png",
+    "source": [
+      0,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      -104,
+      58,
+      973,
+      973
+    ]
+  },
+  "rightHead-prepare": {
+    "src": "generated-atlases/head-hips.png",
+    "source": [
+      512,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      30,
+      48,
+      973,
+      973
+    ]
+  },
+  "rightHead-target": {
+    "src": "generated-atlases/head-hips.png",
+    "source": [
+      512,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      31,
+      58,
+      973,
+      973
+    ]
+  },
+  "hips-prepare": {
+    "src": "generated-atlases/head-hips.png",
+    "source": [
+      1024,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      145,
+      48,
+      973,
+      973
+    ]
+  },
+  "hips-target": {
+    "src": "generated-atlases/head-hips.png",
+    "source": [
+      1024,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      139,
+      58,
+      973,
+      973
+    ]
+  },
+  "bothKnees-prepare": {
+    "src": "generated-atlases/knees.png",
+    "source": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      -46,
+      42,
+      973,
+      973
+    ]
+  },
+  "bothKnees-target": {
+    "src": "generated-atlases/knees.png",
+    "source": [
+      0,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      -41,
+      103,
+      973,
+      973
+    ]
+  },
+  "rightKnee-prepare": {
+    "src": "generated-atlases/knees.png",
+    "source": [
+      512,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      20,
+      42,
+      973,
+      973
+    ]
+  },
+  "rightKnee-target": {
+    "src": "generated-atlases/knees.png",
+    "source": [
+      512,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      27,
+      103,
+      973,
+      973
+    ]
+  },
+  "leftKnee-prepare": {
+    "src": "generated-atlases/knees.png",
+    "source": [
+      1024,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      93,
+      44,
+      973,
+      973
+    ]
+  },
+  "leftKnee-target": {
+    "src": "generated-atlases/knees.png",
+    "source": [
+      1024,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      92,
+      103,
+      973,
+      973
+    ]
+  },
+  "rightHipLeftShoulder-prepare": {
+    "src": "generated-atlases/mixed-clap.png",
+    "source": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      -39,
+      115,
+      911,
+      911
+    ]
+  },
+  "rightHipLeftShoulder-target": {
+    "src": "generated-atlases/mixed-clap.png",
+    "source": [
+      0,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      -38,
+      122,
+      911,
+      911
+    ]
+  },
+  "leftHipRightShoulder-prepare": {
+    "src": "generated-atlases/mixed-clap.png",
+    "source": [
+      512,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      74,
+      115,
+      911,
+      911
+    ]
+  },
+  "leftHipRightShoulder-target": {
+    "src": "generated-atlases/mixed-clap.png",
+    "source": [
+      512,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      75,
+      122,
+      911,
+      911
+    ]
+  },
+  "clap-prepare": {
+    "src": "generated-atlases/mixed-clap.png",
+    "source": [
+      1024,
+      0,
+      512,
+      512
+    ],
+    "destination": [
+      187,
+      115,
+      911,
+      911
+    ]
+  },
+  "clap-target": {
+    "src": "generated-atlases/mixed-clap.png",
+    "source": [
+      1024,
+      512,
+      512,
+      512
+    ],
+    "destination": [
+      187,
+      122,
+      911,
+      911
+    ]
+  },
+  "star-prepare": {
+    "src": "generated-atlases/star-prepare-original.png",
+    "source": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "destination": [
+      3,
+      25,
+      1013,
+      1013
+    ]
+  }
+}
