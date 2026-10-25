@@ -1,0 +1,26 @@
+{
+  "name": "eco-heroes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --configLoader native --host 127.0.0.1",
+    "build": "node scripts/prepare-tracking-assets.mjs && tsc --noEmit && vite build --configLoader native && node scripts/verify-tracking-assets.mjs",
+    "preview": "vite preview --configLoader native --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:tracking-browser": "node scripts/tracking-browser-test.mjs",
+    "test:motion-browser": "node scripts/motion-browser-test.mjs",
+    "test:fist-browser": "node scripts/fist-browser-test.mjs",
+    "test:gesture-lab-browser": "node scripts/gesture-lab-browser-test.mjs",
+    "test:gesture-lab-orientation-browser": "node scripts/gesture-lab-orientation-browser-test.mjs",
+    "benchmark:gestures": "node --experimental-strip-types scripts/gesture-backend-benchmark.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2",
+    "typescript": "~5.9.3",
+    "vite": "~6.4.1"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.1.1"
+  }
+}

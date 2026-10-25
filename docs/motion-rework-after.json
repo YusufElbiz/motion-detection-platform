@@ -1,0 +1,19 @@
+{
+  "label": "after",
+  "environment": "Headless Chrome fake camera, actual CPU model, no physical hand. App pipeline sampled once/second, 12 seconds. Not a hand accuracy or end-to-end latency benchmark.",
+  "samples": [
+    "Kamera 19.9 FPS · Çıkarım 19.5 FPS · İşlem 42.9 ms",
+    "Kamera 20.1 FPS · Çıkarım 19.9 FPS · İşlem 34.1 ms",
+    "Kamera 19.9 FPS · Çıkarım 19.9 FPS · İşlem 28.0 ms",
+    "Kamera 20.1 FPS · Çıkarım 20.1 FPS · İşlem 27.2 ms",
+    "Kamera 20.0 FPS · Çıkarım 20.0 FPS · İşlem 27.7 ms",
+    "Kamera 20.1 FPS · Çıkarım 20.0 FPS · İşlem 29.9 ms",
+    "Kamera 20.1 FPS · Çıkarım 20.0 FPS · İşlem 32.3 ms",
+    "Kamera 19.9 FPS · Çıkarım 19.9 FPS · İşlem 32.3 ms",
+    "Kamera 20.1 FPS · Çıkarım 20.1 FPS · İşlem 30.6 ms",
+    "Kamera 19.9 FPS · Çıkarım 20.0 FPS · İşlem 30.0 ms",
+    "Kamera 20.0 FPS · Çıkarım 20.0 FPS · İşlem 29.3 ms",
+    "Kamera 19.9 FPS · Çıkarım 19.9 FPS · İşlem 29.1 ms"
+  ],
+  "errors": []
+}

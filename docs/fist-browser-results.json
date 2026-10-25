@@ -1,0 +1,243 @@
+{
+  "environment": "Real local MediaPipe Gesture Recognizer on Chrome fake camera; test replaces output landmarks/categories AFTER inference with rotated/tilted hands and model None. Tests the shared hybrid classifier inside gameplay. No physical webcam, gesture accuracy or real child usability proof.",
+  "checks": [
+    "default hybrid fist mode; rotated/tilted 3D hands despite model None; real recognizer initialization, palm calibration, SVG artwork without emoji cursor",
+    "closing away from an object and entering already closed cannot grab",
+    "confirmed closing grabs promptly; closed carry aligns to palm; opening sorts once; grip only with ownership",
+    "two independent fists carry and release different objects",
+    "ambiguous pose and short/full loss cannot score falsely",
+    "rotated hand artwork, resized palm mapping, incorrect classification feedback",
+    "geometry-only alternative uses same fist states without second concurrent model",
+    "GPU preferred with actual delegate displayed; controls locked while camera runs; CPU and 480px mode can be selected on menu; P95/data-age/busy-frame diagnostics"
+  ],
+  "observedSyntheticResponseMs": [
+    {
+      "action": "close-to-attached-DOM",
+      "ms": 201.39999999850988
+    },
+    {
+      "action": "open-to-release-DOM",
+      "ms": 133.60000000149012
+    },
+    {
+      "action": "close-to-attached-DOM",
+      "ms": 204.5
+    },
+    {
+      "action": "close-to-attached-DOM",
+      "ms": 202.09999999776483
+    },
+    {
+      "action": "open-to-release-DOM",
+      "ms": 148.5
+    },
+    {
+      "action": "open-to-release-DOM",
+      "ms": 170.89999999850988
+    },
+    {
+      "action": "close-to-attached-DOM",
+      "ms": 206
+    },
+    {
+      "action": "close-to-attached-DOM",
+      "ms": 203.5
+    },
+    {
+      "action": "open-to-release-DOM",
+      "ms": 111
+    },
+    {
+      "action": "close-to-attached-DOM",
+      "ms": 211.60000000149012
+    },
+    {
+      "action": "open-to-release-DOM",
+      "ms": 141.30000000074506
+    }
+  ],
+  "metrics": [
+    "GPU · Kamera 20.0 FPS · Çıkarım 19.5 FPS · İşlem 14.7 ms · P95 35.4 ms · Veri yaşı 61 ms · Atlanan 47"
+  ],
+  "debug": {
+    "yaklaşım": "gestures",
+    "zamanlama": {
+      "bitmapMs": 0.30000000074505806,
+      "roundTripMs": 12.699999999254942,
+      "modelMs": 12.5,
+      "resultAgeMs": 13.300000000745058
+    },
+    "eller": [
+      {
+        "id": "hand-9",
+        "gesture": "OPEN",
+        "measurement": {
+          "pose": "OPEN",
+          "source": "heuristic",
+          "score": 1,
+          "fingers": [],
+          "evidence": {
+            "pose": "OPEN",
+            "source": "geometry",
+            "geometry": {
+              "pose": "OPEN",
+              "fingers": [
+                {
+                  "name": "İşaret",
+                  "pip": 179.99999879258175,
+                  "dip": 180,
+                  "straightness": 1,
+                  "outward": 0.9260923597695477,
+                  "state": "extended"
+                },
+                {
+                  "name": "Orta",
+                  "pip": 179.99999879258175,
+                  "dip": 180,
+                  "straightness": 1,
+                  "outward": 0.9933244679893436,
+                  "state": "extended"
+                },
+                {
+                  "name": "Yüzük",
+                  "pip": 180,
+                  "dip": 180,
+                  "straightness": 1,
+                  "outward": 0.9886848798389261,
+                  "state": "extended"
+                },
+                {
+                  "name": "Serçe",
+                  "pip": 180,
+                  "dip": 179.99999914622637,
+                  "straightness": 1,
+                  "outward": 0.9090648228942846,
+                  "state": "extended"
+                }
+              ],
+              "space": "world",
+              "valid": true,
+              "extended": 4,
+              "curled": 0
+            },
+            "conflict": false
+          },
+          "modelGesture": {
+            "label": "None",
+            "score": 0.96
+          }
+        },
+        "rawPalm": {
+          "x": 0.6837500000000001,
+          "y": 0.723611111111111,
+          "z": -0.0005437846722219891
+        },
+        "smoothedPalm": {
+          "x": 0.6837499999799732,
+          "y": 0.7236111110931585,
+          "z": -0.0005437846722219891
+        },
+        "rawMapped": {
+          "x": 303.99999999999983,
+          "y": 589.9999999999999
+        },
+        "mapped": {
+          "x": 304.00000003662046,
+          "y": 589.9999999815344
+        },
+        "confirmationMs": 92,
+        "objectId": null,
+        "state": "IDLE",
+        "skorTürü": "Geometri uyumu; olasılık değil"
+      }
+    ],
+    "sonOlaylar": [
+      {
+        "type": "input-disabled",
+        "pointerId": "hand-7",
+        "at": 27445.10000000149,
+        "confirmationMs": 92.69999999925494,
+        "sampleToDispatchMs": 65.80000000149084,
+        "state": "IDLE",
+        "gesture": "OPEN",
+        "sampleGapMs": 46.80000000074506
+      },
+      {
+        "type": "input-disabled",
+        "pointerId": "hand-8",
+        "at": 27445.10000000149,
+        "confirmationMs": 111.39999999850988,
+        "sampleToDispatchMs": 65.80000000149084,
+        "state": "RELEASED",
+        "gesture": "OPEN",
+        "sampleGapMs": 46.80000000074506
+      },
+      {
+        "type": "grab-start",
+        "pointerId": "hand-7",
+        "at": 28683.10000000149,
+        "confirmationMs": 88,
+        "sampleToDispatchMs": 9.700000001488661,
+        "state": "GRAB_PENDING",
+        "gesture": "CLOSED",
+        "sampleGapMs": 0
+      },
+      {
+        "type": "pointer-lost",
+        "pointerId": "hand-7",
+        "at": 29082.5,
+        "confirmationMs": 88,
+        "sampleToDispatchMs": 9.299999999999272,
+        "state": "TRACKING_LOST",
+        "gesture": "CLOSED",
+        "sampleGapMs": 44.5
+      },
+      {
+        "type": "pointer-lost",
+        "pointerId": "hand-7",
+        "at": 29451.20000000298,
+        "confirmationMs": 88,
+        "sampleToDispatchMs": 16.90000000298096,
+        "state": "TRACKING_LOST",
+        "gesture": "CLOSED",
+        "sampleGapMs": 73.10000000149012
+      },
+      {
+        "type": "input-disabled",
+        "pointerId": "hand-7",
+        "at": 30106.60000000149,
+        "confirmationMs": 88,
+        "sampleToDispatchMs": 39.20000000148866,
+        "state": "TRACKING_LOST",
+        "gesture": "CLOSED",
+        "sampleGapMs": 728.5
+      },
+      {
+        "type": "grab-start",
+        "pointerId": "hand-9",
+        "at": 32052.400000002235,
+        "confirmationMs": 120,
+        "sampleToDispatchMs": 18.900000002235174,
+        "state": "GRAB_PENDING",
+        "gesture": "CLOSED",
+        "sampleGapMs": 0
+      },
+      {
+        "type": "grab-release",
+        "pointerId": "hand-9",
+        "at": 33288.20000000298,
+        "confirmationMs": 92,
+        "sampleToDispatchMs": 10.700000002980232,
+        "state": "RELEASE_PENDING",
+        "gesture": "OPEN",
+        "sampleGapMs": 0
+      }
+    ]
+  },
+  "requests": {
+    "total": 15,
+    "external": 0,
+    "nonGet": 0
+  },
+  "errors": []
+}

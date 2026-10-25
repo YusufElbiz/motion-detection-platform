@@ -1,0 +1,29 @@
+{
+  "environment": "Installed headless Chrome; fake webcam; real local MediaPipe CPU inference. Hand landmarks substituted by test code after real inference; no physical-hand accuracy claim. Latency is actual blank-frame model time, not mock time.",
+  "checks": [
+    "hand mode selection; real model startup; one/two-hand calibration; calibrated gameplay cursor",
+    "dwell grab/carry/release; correct and incorrect bins; no duplicate score",
+    "pause and restart cancel carry; restart reuses model",
+    "tracking loss cancels safely without scoring",
+    "two distinct cursors and safe overlapping hands",
+    "pinch grab/carry/release using real source-frame timing and test-substituted landmarks",
+    "resized hand sorting; eight-star win; completion disposes camera/model",
+    "switch to mouse leaves no camera/cursor active",
+    "diagnostic navigation during preparation and simulated hidden-tab setup cleanup"
+  ],
+  "samples": [
+    "GPU · Kamera 19.9 FPS · Çıkarım 20.0 FPS · İşlem 16.6 ms · P95 40.2 ms · Veri yaşı 28 ms · Atlanan 66",
+    "GPU · Kamera 19.9 FPS · Çıkarım 19.8 FPS · İşlem 14.6 ms · P95 32.2 ms · Veri yaşı 28 ms · Atlanan 67",
+    "GPU · Kamera 19.9 FPS · Çıkarım 19.4 FPS · İşlem 17.4 ms · P95 34.2 ms · Veri yaşı 22 ms · Atlanan 68",
+    "GPU · Kamera 20.0 FPS · Çıkarım 20.0 FPS · İşlem 15.4 ms · P95 30.5 ms · Veri yaşı 33 ms · Atlanan 69",
+    "GPU · Kamera 20.1 FPS · Çıkarım 20.1 FPS · İşlem 16.1 ms · P95 32.9 ms · Veri yaşı 39 ms · Atlanan 69",
+    "GPU · Kamera 19.9 FPS · Çıkarım 19.9 FPS · İşlem 13.8 ms · P95 26.5 ms · Veri yaşı 28 ms · Atlanan 69",
+    "Kamera kapalı."
+  ],
+  "requests": {
+    "total": 10,
+    "external": 0,
+    "nonGet": 0
+  },
+  "errors": []
+}

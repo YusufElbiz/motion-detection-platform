@@ -1,0 +1,32 @@
+{
+  "environment": "Actual CPU model execution in headless Chrome on identical blank 640x480 canvas frames, sequential workers; no physical camera, hands or model classification accuracy measured. Blank frames skip hand-gesture heads; not a two-hand workload comparison.",
+  "models": [
+    {
+      "engine": "landmarks",
+      "frames": 100,
+      "warmup": 20,
+      "detectedHands": 0,
+      "meanMs": 25.887499999953434,
+      "p50Ms": 25.699999999254942,
+      "p95Ms": 29.399999998509884,
+      "batchThroughputFps": 36.1637494575535
+    },
+    {
+      "engine": "gestures",
+      "frames": 100,
+      "warmup": 20,
+      "detectedHands": 0,
+      "meanMs": 29.48999999994412,
+      "p50Ms": 28.599999997764826,
+      "p95Ms": 34.5,
+      "batchThroughputFps": 32.405457078987745
+    }
+  ],
+  "heuristicMsPerHand": 0.003564289999999892,
+  "syntheticFilter95PercentStepMs": {
+    "oldFixed65": 200,
+    "adaptive": 50
+  },
+  "physicalAccuracy": "UNMEASURED",
+  "physicalEndToEndLatency": "UNMEASURED"
+}

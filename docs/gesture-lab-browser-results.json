@@ -1,0 +1,30 @@
+{
+  "environment": "Installed headless Chrome, fake camera color bars, real local Gesture Recognizer. No substituted detections. Not physical hand accuracy, two-hand load or physical motion latency.",
+  "delegates": [
+    {
+      "requested": "CPU",
+      "actual": "CPU",
+      "frames": 80,
+      "warmupExcluded": 20,
+      "meanMs": 25.81833333360652,
+      "p95Ms": 28.300000000745058,
+      "detectedHands": 0,
+      "maximumInFlight": 1,
+      "screenMetrics": "Kamera kare/sn\n20.0\nÇıkarım kare/sn\n19.9\nOrtalama çıkarım\n25.7 ms\nP95 çıkarım\n28.3 ms\nEklem verisi yaşı\n55.6 ms\nSonuç yaşı (ort.)\n26.4 ms\nAktarım + çıkarım\n25.9 ms\nKare hazırlama\n0.2 ms\nMeşgulken atlanan\n3\nHız sınırında atlanan\n0\nEski sonuç / atlanan kamera karesi\n0 / 0\nÖlçüm sayısı\n60"
+    },
+    {
+      "requested": "GPU",
+      "actual": "GPU",
+      "frames": 80,
+      "warmupExcluded": 20,
+      "meanMs": 19.608333333643774,
+      "p95Ms": 29.200000002980232,
+      "detectedHands": 0,
+      "maximumInFlight": 1,
+      "screenMetrics": "Kamera kare/sn\n20.0\nÇıkarım kare/sn\n20.2\nOrtalama çıkarım\n19.6 ms\nP95 çıkarım\n29.2 ms\nEklem verisi yaşı\n16.5 ms\nSonuç yaşı (ort.)\n20.2 ms\nAktarım + çıkarım\n19.8 ms\nKare hazırlama\n0.2 ms\nMeşgulken atlanan\n34\nHız sınırında atlanan\n0\nEski sonuç / atlanan kamera karesi\n1 / 31\nÖlçüm sayısı\n61"
+    }
+  ],
+  "checks": [
+    "deep route; camera opt-in; CPU/GPU actual local model; single worker/no queued frames; unique timestamps; DPR/resize; smoothing controls; repeated start-stop; pagehide stops tracks; defaults; navigation to mouse game; zero page errors; local GET-only runtime"
+  ]
+}
