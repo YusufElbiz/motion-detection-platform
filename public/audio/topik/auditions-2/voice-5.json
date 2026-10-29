@@ -1,0 +1,17 @@
+{
+  "ad": "topik_neseli",
+  "gorunen_ad": "Topik Neseli",
+  "cesit": 1,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "A youthful Turkish male cartoon squirrel, light airy boyish voice, bright curious personality, playful and delighted, natural varied intonation, enthusiastic encouraging delivery without shouting, clear native Turkish diction at a relaxed pace, clean studio recording, no background noise.",
+  "ses_yaratilirken_okutulan_metin": "Merhaba, ben Topik, ormanın minik sincap arkadaşıyım, seninle oyun oynamayı ve doğayı korumayı çok seviyorum. Haydi birlikte atıkları ayıralım, her birini doğru kutuya bırakalım, ormandaki hayvanlara yardım edelim ve sonunda kocaman bir sevinçle birbirimize teşekkür edelim!",
+  "tasarim_tohumu": 3959264004,
+  "okuma_tohumu": 3959264004,
+  "referans": "referans.wav",
+  "referans_sn": 15.52,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-10-25 18:52"
+}

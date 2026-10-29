@@ -22,11 +22,16 @@ export class CalibrationManager {
     }
   }
   finish(): boolean {
-    if(this.stage!=='reach'||this.samples.length<20)return false;
+    const bounds=this.measureBounds();if(!bounds)return false;
+    this.bounds=bounds;this.stage='ready';this.samples=[];return true;
+  }
+  get canFinish(){return this.measureBounds()!==undefined;}
+  private measureBounds():Bounds|undefined {
+    if(this.stage!=='reach'||this.samples.length<20)return;
     const quantile=(values:number[],fraction:number)=>values.sort((a,b)=>a-b)[Math.floor((values.length-1)*fraction)];
     const x=this.samples.map(p=>p.x),y=this.samples.map(p=>p.y);
     const left=quantile([...x],.03),right=quantile([...x],.97),top=quantile([...y],.03),bottom=quantile([...y],.97);
-    if(right-left<.2||bottom-top<.2)return false;
-    this.bounds={left,top,right,bottom};this.stage='ready';this.samples=[];return true;
+    if(right-left<.2||bottom-top<.2)return;
+    return {left,top,right,bottom};
   }
 }

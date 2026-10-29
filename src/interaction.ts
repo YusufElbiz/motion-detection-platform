@@ -26,7 +26,7 @@ export class InteractionController {
     const held=this.heldIds;
     return [...this.state.objects].reverse().filter(object=>!held.has(object.id)||this.heldBy(pointerId)===object.id).find(object=>objectContains(object,point,source));
   }
-  targetBin(point:Position,source:'mouse'|'hand'='hand'){return binAt(point,source==='hand'?this.binPadding:0);}
+  targetBin(point:Position,source:'mouse'|'hand'='hand'){return binAt(point,source==='hand'?this.binPadding:12);}
   enable(){this.enabled=true;}
   disable(){for(const id of this.carries.keys())this.cancel(id);this.hovered.clear();this.binHighlights.clear();this.enabled=false;}
   replaceState(state:GameState){this.disable();this.state=state;}
@@ -61,7 +61,7 @@ export class InteractionController {
     if(event.type==='grab-held'){this.move(carry,point,id);return;}
     if(event.type==='grab-release'){
       this.move(carry,point,id);
-      const bin=this.targetBin(point,carry.source);
+      const bin=this.targetBin(object,carry.source);
       // Clear ownership before classifying. Further release events become no-ops.
       this.carries.delete(id);this.binHighlights.delete(id);this.hovered.delete(id);
       if(bin){
@@ -74,6 +74,6 @@ export class InteractionController {
   private move(carry:Carry,point:Position,id:string){
     const object=this.state.objects.find(o=>o.id===carry.objectId);if(!object)return;
     object.x=Math.max(50,Math.min(1230,point.x+carry.offset.x));object.y=Math.max(130,Math.min(675,point.y+carry.offset.y));carry.position=point;
-    const bin=this.targetBin(point,carry.source);if(bin)this.binHighlights.set(id,bin);else this.binHighlights.delete(id);
+    const bin=this.targetBin(object,carry.source);if(bin)this.binHighlights.set(id,bin);else this.binHighlights.delete(id);
   }
 }

@@ -5,8 +5,25 @@ import {categoryIds} from '../src/config.ts';
 import {wasteCatalog,variantsFor,wasteDefinition} from '../src/waste.ts';
 import {wasteArt} from '../src/art.ts';
 test('all sixteen category pairs classify correctly',()=>{for(const a of categoryIds) for(const b of categoryIds) assert.equal(classify(a,b),a===b);});
+
+test('selected goal controls completion and caps automatic waste spawning',()=>{
+ for(const goal of [1,4,12,40]){
+  const state=createState(goal);
+  for(let i=0;i<goal;i++){
+   if(!state.objects.length)spawn(state,()=>0);
+   const object=state.objects[0];sort(state,object.id,object.category);
+   assert.equal(state.complete,i===goal-1);
+  }
+  assert.equal(state.score,goal);
+ }
+ const state=createState(2);spawn(state,()=>0);
+ for(let i=0;i<1000;i++)advance(state,.05,'normal',null);
+ assert.equal(state.spawned,2);assert.equal(state.objects.length,2);
+ assert.equal(createState(0).goal,1);assert.equal(createState(100).goal,40);
+ assert.equal(createState(NaN).goal,8);assert.equal(createState(3.7).goal,4);
+});
 test('wrong bin preserves object and score; correct bin scores once',()=>{const s=createState();spawn(s,()=>0);assert.equal(sort(s,1,'paper'),false);assert.equal(s.score,0);assert.equal(s.objects.length,1);assert.equal(sort(s,1,'plastic'),true);assert.equal(s.score,1);assert.equal(sort(s,1,'plastic'),false);assert.equal(s.score,1);});
-test('eight successful sorts complete the round; new state resets it',()=>{const s=createState();for(let i=0;i<8;i++){spawn(s,()=>0);const o=s.objects[0];sort(s,o.id,o.category);}assert.equal(s.complete,true);assert.equal(s.score,8);assert.deepEqual(createState(),{objects:[],score:0,nextId:1,elapsed:0,spawned:0,complete:false});});
+test('eight successful sorts complete the round; new state resets it',()=>{const s=createState();for(let i=0;i<8;i++){spawn(s,()=>0);const o=s.objects[0];sort(s,o.id,o.category);}assert.equal(s.complete,true);assert.equal(s.score,8);assert.deepEqual(createState(),{objects:[],score:0,goal:8,nextId:1,elapsed:0,spawned:0,complete:false});});
 test('falling uses elapsed time; held objects stay still; floor is forgiving',()=>{const s=createState();spawn(s,()=>0);advance(s,.05,'relaxed',1);assert.equal(s.objects[0].y,155);advance(s,.05,'relaxed',null);assert.equal(s.objects[0].y,156.5);for(let i=0;i<400;i++)advance(s,.05,'normal',null);assert.equal(s.objects[0].y,476);assert.ok(s.objects.length<=4);});
 test('completed state stops updates; all categories appear',()=>{const s=createState();for(let i=0;i<4;i++)spawn(s,()=>0);assert.deepEqual(s.objects.map(o=>o.category),categoryIds);s.complete=true;const before=structuredClone(s);advance(s,.05,'normal',null);assert.deepEqual(s,before);});
 

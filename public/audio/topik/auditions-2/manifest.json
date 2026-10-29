@@ -1,0 +1,139 @@
+{
+  "engine": "VoxCPM2, patched audio.cpp v0.7.2",
+  "steps": 16,
+  "cfg": 2.0,
+  "synthetic": true,
+  "design_text": "Merhaba, ben Topik, ormanın minik sincap arkadaşıyım, seninle oyun oynamayı ve doğayı korumayı çok seviyorum. Haydi birlikte atıkları ayıralım, her birini doğru kutuya bırakalım, ormandaki hayvanlara yardım edelim ve sonunda kocaman bir sevinçle birbirimize teşekkür edelim!",
+  "audition_text": "Merhaba, ben Topik!\nCamlar buraya, yeşil kutuya birlikte atalım!\nHarika gidiyorsun, doğa için bir iyilik daha!\nAtıkları ayırarak yeniden kullanılmalarına yardım ettin.\nTeşekkürler, doğa dostum!",
+  "variants": [
+    {
+      "number": 4,
+      "name": "Topik Masal",
+      "label": "Yumuşak masal tonu",
+      "prompt": "A young adult Turkish woman with a soft youthful voice and a warm reassuring smile, gentle preschool storyteller, intimate natural conversational delivery, smooth melodic intonation, calm but cheerful, clear native Turkish diction, clean studio recording, no background noise.",
+      "file": "voice-4.mp3",
+      "seed": 2180055391,
+      "reference_folder": ".tools\\vox\\sesler\\topik_masal\\cesit_01",
+      "duration_seconds": 14.2,
+      "speed_gate_warnings": [],
+      "sentences": [
+        {
+          "satir": 1,
+          "metin": "Merhaba, ben Topik!",
+          "t0": 0.0,
+          "t1": 1.6
+        },
+        {
+          "satir": 2,
+          "metin": "Camlar buraya, yeşil kutuya birlikte atalım!",
+          "t0": 1.95,
+          "t1": 4.83
+        },
+        {
+          "satir": 3,
+          "metin": "Harika gidiyorsun, doğa için bir iyilik daha!",
+          "t0": 5.18,
+          "t1": 8.06
+        },
+        {
+          "satir": 4,
+          "metin": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin.",
+          "t0": 8.41,
+          "t1": 11.93
+        },
+        {
+          "satir": 5,
+          "metin": "Teşekkürler, doğa dostum!",
+          "t0": 12.28,
+          "t1": 14.2
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Topik Neseli",
+      "label": "Neşeli çizgi film tonu",
+      "prompt": "A youthful Turkish male cartoon squirrel, light airy boyish voice, bright curious personality, playful and delighted, natural varied intonation, enthusiastic encouraging delivery without shouting, clear native Turkish diction at a relaxed pace, clean studio recording, no background noise.",
+      "file": "voice-5.mp3",
+      "seed": 3959264004,
+      "reference_folder": ".tools\\vox\\sesler\\topik_neseli\\cesit_01",
+      "duration_seconds": 12.6,
+      "speed_gate_warnings": [],
+      "sentences": [
+        {
+          "satir": 1,
+          "metin": "Merhaba, ben Topik!",
+          "t0": 0.0,
+          "t1": 1.44
+        },
+        {
+          "satir": 2,
+          "metin": "Camlar buraya, yeşil kutuya birlikte atalım!",
+          "t0": 1.79,
+          "t1": 4.19
+        },
+        {
+          "satir": 3,
+          "metin": "Harika gidiyorsun, doğa için bir iyilik daha!",
+          "t0": 4.54,
+          "t1": 7.1
+        },
+        {
+          "satir": 4,
+          "metin": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin.",
+          "t0": 7.45,
+          "t1": 10.49
+        },
+        {
+          "satir": 5,
+          "metin": "Teşekkürler, doğa dostum!",
+          "t0": 10.84,
+          "t1": 12.6
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "name": "Topik Minik Dost",
+      "label": "Oyuncu minik dost tonu",
+      "prompt": "An original small cuddly Turkish forest creature with a soft rounded slightly husky voice, youthful gender neutral cartoon character, tender and mischievous, smiling with a little amused chuckle in the tone, expressive natural conversational rhythm, friendly unhurried native Turkish speech, clean studio recording, no background noise.",
+      "file": "voice-6.mp3",
+      "seed": 1653432708,
+      "reference_folder": ".tools\\vox\\sesler\\topik_minik_dost\\cesit_01",
+      "duration_seconds": 14.52,
+      "speed_gate_warnings": [],
+      "sentences": [
+        {
+          "satir": 1,
+          "metin": "Merhaba, ben Topik!",
+          "t0": 0.0,
+          "t1": 2.08
+        },
+        {
+          "satir": 2,
+          "metin": "Camlar buraya, yeşil kutuya birlikte atalım!",
+          "t0": 2.43,
+          "t1": 5.15
+        },
+        {
+          "satir": 3,
+          "metin": "Harika gidiyorsun, doğa için bir iyilik daha!",
+          "t0": 5.5,
+          "t1": 8.54
+        },
+        {
+          "satir": 4,
+          "metin": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin.",
+          "t0": 8.89,
+          "t1": 12.41
+        },
+        {
+          "satir": 5,
+          "metin": "Teşekkürler, doğa dostum!",
+          "t0": 12.76,
+          "t1": 14.52
+        }
+      ]
+    }
+  ]
+}

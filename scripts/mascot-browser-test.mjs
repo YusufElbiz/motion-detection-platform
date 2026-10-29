@@ -1,0 +1,95 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({channel:'chrome',headless:true});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:1100}});const errors=[];
+ page.on('pageerror',e=>errors.push(String(e)));
+ await page.addInitScript(()=>{
+  window.__spoken=[];window.__audio=[];
+  const play=HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play=function(){if(this.src.includes('/audio/topik/'))window.__spoken.push({src:this.src});window.__audio.push(this);return play.call(this);};
+  window.speechSynthesis.speak=()=>{throw new Error('Browser robot voice must not be used');};
+ });
+ await page.goto('http://127.0.0.1:5173');
+ await page.locator('#waste-count').fill('2');await page.locator('#start').click();
+ assert.equal(await page.locator('#score-goal').textContent(),'2');
+ assert.equal(await page.locator('#instructions').isVisible(),true);assert.equal(await page.locator('.waste').count(),0);
+ assert.match(await page.locator('#instruction-text').textContent(),/fareyle/);
+ await page.waitForFunction(()=>document.querySelector('#instructions').classList.contains('speaking'));
+ assert.match((await page.evaluate(()=>window.__spoken.at(-1))).src,/tutorial-mouse\.mp3/);
+ assert.match((await page.evaluate(()=>window.__spoken.at(-1))).src,/voice-3\//);
+ assert.equal(await page.evaluate(()=>window.__audio.at(-1).volume),.8);
+ await page.locator('#instructions').waitFor({state:'hidden',timeout:30000});
+ assert.equal(await page.locator('#mascot-companion').isVisible(),true);
+ const firstTransform=await page.locator('#mascot-companion .squirrel-body').evaluate(el=>getComputedStyle(el).transform);
+ await page.waitForFunction(before=>getComputedStyle(document.querySelector('#mascot-companion .squirrel-body')).transform!==before,firstTransform);
+ const clips=await page.evaluate(async()=>{
+  const manifest=await (await fetch('/audio/topik/voice-3/manifest.json')).json();
+  if(manifest.selected_variant!==3||manifest.seed!==3637895427||manifest.loudness_lufs!==-21)throw Error('Wrong voice selection or processing');
+  const context=new AudioContext();const durations=[];
+  for(const name of Object.keys(manifest.lines)){
+   const response=await fetch(`/audio/topik/voice-3/${name}.mp3`);if(!response.ok)throw Error(name);
+   const buffer=await context.decodeAudioData(await response.arrayBuffer());durations.push(buffer.duration);
+  }
+  await context.close();return durations;
+ });
+ assert.equal(clips.length,10);assert.ok(clips.every(seconds=>seconds>1&&seconds<20));
+ await page.waitForFunction(()=>!document.querySelector('#mascot-companion').classList.contains('greeting'));
+ assert.equal(await page.locator('#mascot-companion .squirrel-wave').evaluate(el=>getComputedStyle(el).animationName),'none','arm does not keep waving at rest');
+ assert.equal(await page.locator('#mascot-companion .squirrel-wave').evaluate(el=>getComputedStyle(el).transform),'matrix(1, 0, 0, 1, 0, 0)','resting arm is not held up');
+ const bins={plastic:0,paper:1,glass:2,metal:3};
+ async function sortFirst(wrong=false){
+  const waste=page.locator('.waste').first();await waste.waitFor();
+  const index=bins[await waste.getAttribute('data-category')];
+  const box=await waste.boundingBox(),field=await page.locator('#playfield').boundingBox();
+  await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();
+  await page.mouse.move(field.x+field.width*(304+224*(wrong?(index+1)%4:index))/1280,field.y+field.height*590/720,{steps:12});await page.mouse.up();
+ }
+ const firstCategory=await page.locator('.waste').first().getAttribute('data-category');
+ const roamingX=await page.locator('#mascot-companion').evaluate(el=>parseFloat(el.style.left));
+ await page.waitForTimeout(250);
+ assert.equal(await page.locator('#mascot-companion').evaluate(el=>parseFloat(el.style.left)),roamingX,'Squirrel waits in the centre');
+ assert.equal(roamingX,50);
+ assert.equal(await page.locator('#mascot-companion').getAttribute('data-behavior'),'watching');
+ const watched=await page.locator('#mascot-companion').getAttribute('data-watching-object');assert.ok(watched);
+ const eyeTransform=await page.locator('#mascot-companion .squirrel-pupils').evaluate(el=>getComputedStyle(el).transform);assert.notEqual(eyeTransform,'none');
+ await page.screenshot({path:'docs/screenshots/squirrel-watching.png',fullPage:true});
+ assert.equal(await page.locator('#mascot-companion').evaluate(el=>getComputedStyle(el).zIndex),'1');
+ await sortFirst(true);assert.match(await page.locator('#mascot-message').textContent(),/buraya/);
+ assert.equal(await page.locator('#mascot-companion').getAttribute('data-guide-category'),firstCategory);
+ assert.equal(await page.locator('.bin.mascot-target').getAttribute('data-category'),firstCategory);
+ await page.waitForFunction(()=>document.querySelector('#mascot-companion').dataset.arrived==='true');
+ const targetX={plastic:304,paper:528,glass:752,metal:976}[firstCategory]/1280*100;
+ assert.ok(Math.abs(await page.locator('#mascot-companion').evaluate(el=>parseFloat(el.style.left))-targetX)<.3);
+ await page.screenshot({path:'docs/screenshots/mascot-guide.png',fullPage:true});
+ const spokenBeforeCorrect=await page.evaluate(()=>window.__spoken.length);
+ await sortFirst();assert.equal(await page.evaluate(()=>window.__spoken.length),spokenBeforeCorrect,'quick correct match does not speak another encouragement');
+ assert.equal(await page.locator('#mascot-companion').getAttribute('data-behavior'),'celebrating');
+ assert.match(await page.locator('#mascot-companion .squirrel-body').evaluate(el=>getComputedStyle(el).animationName),/squirrel-leap/);
+ assert.equal(await page.locator('#mascot-companion .squirrel-happy-eyes').evaluate(el=>getComputedStyle(el).opacity),'1');
+ assert.match(await page.locator('#mascot-companion .squirrel-arm-left').evaluate(el=>getComputedStyle(el).animationName),/squirrel-cheer-left/);
+ assert.equal(await page.locator('.bin.mascot-target').count(),0);
+ assert.equal(await page.locator('#result').isVisible(),false);
+ await page.locator('#pause').click();assert.equal(await page.locator('#mascot-companion').isVisible(),false);
+ assert.equal(await page.evaluate(()=>window.__audio.every(audio=>audio.paused)),true);
+ await page.locator('#resume').click();assert.equal(await page.locator('#mascot-companion').isVisible(),true);
+ await sortFirst();await page.locator('#result').waitFor({state:'visible'});
+ assert.match(await page.locator('#result-count').textContent(),/2 atığı/);
+ assert.match(await page.locator('#result-speech').textContent(),/Enerji tasarrufuna/);
+ assert.equal(await page.locator('#mascot-companion').isVisible(),false);
+ assert.match((await page.evaluate(()=>window.__spoken.at(-1))).src,/ending\.mp3/);
+ const before=await page.evaluate(()=>window.__spoken.length);
+ await page.locator('#mascot-repeat').click();assert.equal(await page.evaluate(()=>window.__spoken.length),before+1);
+ await page.locator('#sound').click();const muted=await page.evaluate(()=>window.__spoken.length);
+ assert.equal(await page.evaluate(()=>window.__audio.every(audio=>audio.paused)),true);
+ await page.locator('#mascot-repeat').click();assert.equal(await page.evaluate(()=>window.__spoken.length),muted);
+ await page.screenshot({path:'docs/screenshots/mascot-result.png',fullPage:true});
+ await page.locator('#again').click();assert.equal(await page.locator('#score').textContent(),'0');assert.equal(await page.locator('#score-goal').textContent(),'2');
+ await page.locator('#home').click();assert.equal(await page.locator('#mascot-companion').isVisible(),false);
+ await page.locator('#waste-count').fill('1');await page.locator('#start').click();await sortFirst();
+ assert.match(await page.locator('#result-count').textContent(),/1 atığı/);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ assert.equal(await page.locator('#result .squirrel-body').evaluate(el=>getComputedStyle(el).animationName),'none');
+ assert.deepEqual(errors,[]);
+ console.log('PASS: squirrel waits at rear centre and tracks waste with pupils; ten local MP3s, correct-bin guidance, celebration, pause/mute, reduced motion, final speech and replay.');
+}finally{await browser.close();}

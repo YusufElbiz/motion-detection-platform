@@ -1,0 +1,131 @@
+{
+  "engine": "VoxCPM2, patched audio.cpp v0.7.2",
+  "steps": 16,
+  "cfg": 2.0,
+  "synthetic": true,
+  "prompt": "A cheerful young Turkish cartoon squirrel with a youthful, light, soft voice, a playful smile in the voice, clear native Turkish pronunciation, warm encouraging delivery for preschool children, lively but unhurried pace, natural expressive intonation, clean studio recording with no background noise.",
+  "design_text": "Merhaba, ben Topik, senin minik sincap arkadaşınım! Haydi birlikte atıkları ayıralım, doğayı temiz tutup ormandaki dostlarımıza yardım edelim.",
+  "audition_text": "Merhaba, ben Topik!\nCamlar buraya, yeşil kutuya birlikte atalım!\nHarika gidiyorsun, doğa için bir iyilik daha!\nAtıkları ayırarak yeniden kullanılmalarına yardım ettin.\nTeşekkürler, doğa dostum!",
+  "variants": [
+    {
+      "number": 1,
+      "file": "voice-1.mp3",
+      "seed": 542557539,
+      "reference_folder": ".tools\\vox\\sesler\\topik_sincap\\cesit_01",
+      "duration_seconds": 13.56,
+      "speed_gate_warnings": [],
+      "sentences": [
+        {
+          "satir": 1,
+          "metin": "Merhaba, ben Topik!",
+          "t0": 0.0,
+          "t1": 1.6
+        },
+        {
+          "satir": 2,
+          "metin": "Camlar buraya, yeşil kutuya birlikte atalım!",
+          "t0": 1.95,
+          "t1": 4.67
+        },
+        {
+          "satir": 3,
+          "metin": "Harika gidiyorsun, doğa için bir iyilik daha!",
+          "t0": 5.02,
+          "t1": 7.58
+        },
+        {
+          "satir": 4,
+          "metin": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin.",
+          "t0": 7.93,
+          "t1": 11.29
+        },
+        {
+          "satir": 5,
+          "metin": "Teşekkürler, doğa dostum!",
+          "t0": 11.64,
+          "t1": 13.56
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "file": "voice-2.mp3",
+      "seed": 1538085694,
+      "reference_folder": ".tools\\vox\\sesler\\topik_sincap\\cesit_02",
+      "duration_seconds": 12.92,
+      "speed_gate_warnings": [],
+      "sentences": [
+        {
+          "satir": 1,
+          "metin": "Merhaba, ben Topik!",
+          "t0": 0.0,
+          "t1": 1.44
+        },
+        {
+          "satir": 2,
+          "metin": "Camlar buraya, yeşil kutuya birlikte atalım!",
+          "t0": 1.79,
+          "t1": 4.35
+        },
+        {
+          "satir": 3,
+          "metin": "Harika gidiyorsun, doğa için bir iyilik daha!",
+          "t0": 4.7,
+          "t1": 7.26
+        },
+        {
+          "satir": 4,
+          "metin": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin.",
+          "t0": 7.61,
+          "t1": 10.65
+        },
+        {
+          "satir": 5,
+          "metin": "Teşekkürler, doğa dostum!",
+          "t0": 11.0,
+          "t1": 12.92
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "file": "voice-3.mp3",
+      "seed": 3637895427,
+      "reference_folder": ".tools\\vox\\sesler\\topik_sincap\\cesit_03",
+      "duration_seconds": 13.72,
+      "speed_gate_warnings": [],
+      "sentences": [
+        {
+          "satir": 1,
+          "metin": "Merhaba, ben Topik!",
+          "t0": 0.0,
+          "t1": 1.76
+        },
+        {
+          "satir": 2,
+          "metin": "Camlar buraya, yeşil kutuya birlikte atalım!",
+          "t0": 2.11,
+          "t1": 4.83
+        },
+        {
+          "satir": 3,
+          "metin": "Harika gidiyorsun, doğa için bir iyilik daha!",
+          "t0": 5.18,
+          "t1": 7.74
+        },
+        {
+          "satir": 4,
+          "metin": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin.",
+          "t0": 8.09,
+          "t1": 11.61
+        },
+        {
+          "satir": 5,
+          "metin": "Teşekkürler, doğa dostum!",
+          "t0": 11.96,
+          "t1": 13.72
+        }
+      ]
+    }
+  ]
+}

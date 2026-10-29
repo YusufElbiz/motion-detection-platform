@@ -1,0 +1,66 @@
+[
+  {
+    "id": "glass-bottle",
+    "prompt": "Use case: product-mockup. Create a single photorealistic product photograph cutout PNG of one empty green glass water bottle, no cap, no label, no branding. Real translucent green glass, thick base, narrow long neck, natural specular highlights, recognizably glass rather than plastic. Upright entire object centered in square frame occupying 86 percent height, generous small transparent margin, slight three-quarter front view, soft studio light. Actual transparent alpha background, no floor, no pedestal, no cast shadow outside object. For a recycling sorting game at small size. No drawing, no illustration, no vector, no text, no watermark."
+  },
+  {
+    "id": "plastic-bottle",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty clear PET plastic drinking water bottle with blue screw cap, unmistakable molded horizontal ribs, thin crinkled transparent plastic, no label. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "plastic-detergent",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty opaque bright blue plastic detergent bottle with integrated handle and white screw cap, no label. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "plastic-yogurt",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty white plastic yogurt tub, open with visible empty white interior and thick rolled rim, small blue color band without text. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "plastic-cup",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty clear disposable plastic cup, visibly thin transparent plastic with molded horizontal ridges, three-quarter view. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "paper-sheet",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one slightly crumpled white sheet of paper with a folded corner, angled upright so the full paper silhouette is visible. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "paper-newspaper",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one folded newspaper, realistic grey-white newsprint and dense tiny unreadable printed columns, folded edge visible, no readable headlines. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "paper-box",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty brown corrugated cardboard box with open flaps, visible corrugation and kraft paper texture. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "paper-bag",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one upright brown kraft paper shopping bag with twisted paper loop handles, empty, slightly creased textured paper. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "glass-jar",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty clear thick glass food jar with no lid, wide screw-thread mouth, glass bottom and sharp white highlights, no label. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "glass-brown-bottle",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty amber brown glass bottle without cap or label, long neck, heavy smooth glass with translucent amber highlights. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "glass-sauce",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty clear glass sauce bottle with a silver metal screw cap, short narrow neck and broad rectangular body, no label. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "metal-can",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty silver aluminum beverage can with an opened pull tab, unpainted brushed metal reflecting studio light, no label. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "metal-food-can",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty open steel food tin can with realistic horizontal ribbed sides, visible empty metal interior, safe rolled rim, no lid and no label. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "metal-lid",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one circular silver metal jar lid, angled three-quarter top view showing shallow height and crimped metallic rim, subtle brushed steel reflections. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  },
+  {
+    "id": "metal-tray",
+    "prompt": "Use case: product-mockup. Asset type: recycling game transparent PNG cutout. Subject: one empty rectangular disposable aluminum foil food tray with crimped edges, shiny folded foil texture, three-quarter top view showing empty interior. Photorealistic studio product photograph of an actual physical object, realistic material texture and natural reflections. Single object only, entire object centered, upright where applicable, subtle three-quarter front angle, occupying 85 percent of square frame with clear margins. Soft neutral studio lighting. Genuinely transparent alpha background. No floor, no props, no pedestal, no added shadows outside object. No illustration, no vector, no cartoon, no logo, no watermark. Distinct recognizable silhouette at small game size."
+  }
+]

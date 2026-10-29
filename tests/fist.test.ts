@@ -41,6 +41,25 @@ test('palm, not index tip, anchors fist input and object stays exactly attached'
  for(const [x,y]of [[220,300],[250,420],[280,510],[304,590]]){d.step([fixture(x,y,true)]);assert.ok(Math.abs(d.state.objects[0].x-x)<1e-8);assert.ok(Math.abs(d.state.objects[0].y-y)<1e-8);}
  for(let i=0;i<4;i++)d.step([fixture(304,590,false)]);assert.equal(d.state.score,1);for(let i=0;i<5;i++)d.step([fixture(304,590,false)]);assert.equal(d.state.score,1);
 });
+
+test('quick open approach grabs without hovering; single false frames cannot grab or release',()=>{
+ const d=driver();for(let i=0;i<6;i++)d.step([fixture(350,200,false)]);
+ d.step([fixture(200,200,false)]); // Only one sample over the object, no dwell.
+ d.step([fixture(200,200,true)]);assert.equal(d.world.heldIds.size,0);
+ d.step([fixture(200,200,false)]);assert.equal(d.world.heldIds.size,0);
+ for(let i=0;i<3;i++)d.step([fixture(200,200,true)]);
+ assert.equal(d.world.heldIds.size,1);
+ d.step([fixture(250,350,true)]);d.step([fixture(304,590,true)]);
+ d.step([fixture(304,590,false)]);
+ assert.equal(d.state.score,0);assert.equal(d.world.heldIds.size,1);
+ d.step([fixture(304,590,true)]);assert.equal(d.world.heldIds.size,1);
+ for(let i=0;i<3;i++)d.step([fixture(304,590,false)]);
+ assert.equal(d.state.score,1);
+ const other=driver();for(let i=0;i<7;i++)other.step([fixture(650,200,false)]);
+ other.step([fixture(650,200,true)]);
+ for(let i=0;i<6;i++)other.step([fixture(200,200,true)]);
+ assert.equal(other.world.heldIds.size,0,'closing in empty space cannot acquire an object while approaching');
+});
 test('closed reappearance, overlap, pause and restart never transfer ownership or score',()=>{
  const d=driver();for(let i=0;i<6;i++)d.step([fixture(200,200,true)]);assert.equal(d.world.heldIds.size,0);
  for(let i=0;i<4;i++)d.step([fixture()]);for(let i=0;i<4;i++)d.step([fixture(200,200,true)]);assert.equal(d.world.heldIds.size,1);
@@ -48,12 +67,13 @@ test('closed reappearance, overlap, pause and restart never transfer ownership o
  d.motion.disable();d.world.disable();d.step([fixture(304,590,false)]);assert.equal(d.state.score,0);
  const next=createState();spawn(next,()=>0);d.world.replaceState(next);d.world.enable();d.motion.enable();for(let i=0;i<5;i++)d.step([fixture(200,155,true)]);assert.equal(d.world.heldIds.size,0);assert.equal(next.score,0);
 });
-test('two independent model-guided fists own separate objects; ambiguous overlap cancels both',()=>{
+test('two independent fists freeze during brief ambiguity and cancel only after loss grace',()=>{
  const d=driver();spawn(d.state,()=>0);d.state.objects[1].x=600;d.state.objects[1].y=200;
  for(let i=0;i<6;i++)d.step([fixture(200,200,false,1,.95),fixture(600,200,false,2,.95)]);
  for(let i=0;i<4;i++)d.step([fixture(200,200,true,1,.95),fixture(600,200,true,2,.95)]);
  assert.equal(d.world.heldIds.size,2);assert.notEqual(d.world.heldBy('hand-1'),d.world.heldBy('hand-2'));
- d.step([fixture(400,200,true,1,.95),fixture(420,200,true,2,.95)],40,true);assert.equal(d.world.heldIds.size,0);assert.equal(d.state.score,0);
+ d.step([fixture(400,200,true,1,.95),fixture(420,200,true,2,.95)],40,true);assert.equal(d.world.heldIds.size,2);assert.equal(d.state.score,0);
+ for(let i=0;i<18;i++)d.step([],40,true);assert.equal(d.world.heldIds.size,0);assert.equal(d.state.score,0);
 });
 test('adaptive smoothing reduces large-step lag but filters stationary jitter',()=>{
  assert.ok(adaptiveTimeConstant(1)<adaptiveTimeConstant(.01));
@@ -93,12 +113,14 @@ test('game uses laboratory geometry: tilted horizontal hands grab and release de
  for(let i=0;i<5;i++)d.step([hand(304,590,false)]);assert.equal(d.state.score,1);
 });
 
-test('game cancels hybrid carry on ambiguous identities instead of transferring the object',()=>{
+test('brief hybrid identity ambiguity freezes carry and stable same-hand recovery retains ownership',()=>{
  const d=driver();
  const hand=(closed:boolean)=>({...fixture(200,200,closed),modelGesture:{label:'None',score:.99}});
  for(let i=0;i<6;i++)d.step([hand(false)]);for(let i=0;i<4;i++)d.step([hand(true)]);
  assert.equal(d.world.heldIds.size,1);d.step([hand(true)],40,true);
- assert.equal(d.world.heldIds.size,0);assert.equal(d.state.score,0);
+ assert.equal(d.world.heldIds.size,1);assert.equal(d.state.score,0);
+ for(let i=0;i<5;i++)d.step([hand(true)]);
+ assert.equal(d.world.heldBy('hand-1'),1);assert.equal(d.motion.cursors[0].state,'CARRYING');assert.equal(d.state.score,0);
 });
 
 test('fast carry tolerates the same motion speed at 10 FPS without relaxing lost-hand evidence',()=>{
@@ -107,7 +129,7 @@ test('fast carry tolerates the same motion speed at 10 FPS without relaxing lost
  d.step([fixture(600,200,true)],100);assert.equal(d.world.heldIds.size,1);assert.ok(Math.abs(d.state.objects[0].x-600)<1e-8);
  assert.equal(d.motion.cursors[0].gesture,'CLOSED');
  d.step([fixture(304,590,true)],100);assert.equal(d.world.heldIds.size,1);
- for(let i=0;i<3;i++)d.step([fixture(304,590,false)]);assert.equal(d.state.score,1);
+ for(let i=0;i<4;i++)d.step([fixture(304,590,false)]);assert.equal(d.state.score,1);
 });
 
 test('instant teleport still cancels fist ownership without recycling',()=>{

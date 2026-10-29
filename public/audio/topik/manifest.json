@@ -1,0 +1,19 @@
+{
+  "engine": "edge-tts 7.3.1",
+  "voice": "tr-TR-EmelNeural",
+  "rate": "+8%",
+  "pitch": "+24Hz",
+  "volume": "-8%",
+  "lines": {
+    "hello": "Merhaba! Ben Topik. Haydi, atıkları ayırıp doğaya yardım edelim!",
+    "retry": "Olsun, birlikte tekrar deneyelim! Resmine benzeyen kutuyu bulabilirsin.",
+    "ending": "Atıkları ayırarak yeniden kullanılmalarına yardım ettin. Enerji tasarrufuna ve doğanın temiz kalmasına katkı sağladın. Teşekkürler, doğa dostum!",
+    "cheer-1": "Harika gidiyorsun! Doğa için bir iyilik daha!",
+    "cheer-2": "Yaşasın! Birlikte doğayı koruyoruz!",
+    "cheer-3": "Doğru kutuyu buldun! Böyle devam!",
+    "guide-plastic": "Plastikler buraya! Sarı kutuya, birlikte atalım!",
+    "guide-paper": "Kâğıtlar buraya! Mavi kutuya, birlikte atalım!",
+    "guide-glass": "Camlar buraya! Yeşil kutuya, birlikte atalım!",
+    "guide-metal": "Metaller buraya! Gri kutuya, birlikte atalım!"
+  }
+}

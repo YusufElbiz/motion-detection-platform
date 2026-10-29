@@ -1,8 +1,8 @@
 import {categories,categoryIds, config, type Category, type Difficulty} from './config.ts';
 import {variantsFor,wasteDefinition} from './waste.ts';
 export interface Waste {id: number; category: Category; variant?:string; x: number; y: number}
-export interface GameState {objects: Waste[]; score: number; nextId: number; elapsed: number; spawned: number; complete: boolean;categoryBag?:Category[];variantBags?:Partial<Record<Category,string[]>>}
-export const createState = (): GameState => ({objects: [], score: 0, nextId: 1, elapsed: 0, spawned: 0, complete: false});
+export interface GameState {objects: Waste[]; score: number; goal:number; nextId: number; elapsed: number; spawned: number; complete: boolean;categoryBag?:Category[];variantBags?:Partial<Record<Category,string[]>>}
+export const createState = (goal:number=config.goal): GameState => ({objects: [], score: 0, goal:Number.isFinite(goal)?Math.max(1,Math.min(40,Math.round(goal))):config.goal, nextId: 1, elapsed: 0, spawned: 0, complete: false});
 export const classify = (waste: Category, bin: Category) => waste === bin;
 export function wasteName(waste:Waste){const definition=wasteDefinition(waste.variant);return definition?.category===waste.category?definition.name:categories[waste.category].name;}
 export function spawn(state: GameState,random:()=>number=Math.random) {
@@ -29,7 +29,7 @@ export function advance(state: GameState, seconds: number, difficulty: Difficult
   const dt = Math.max(0, Math.min(seconds, 0.05));
   const settings = config.difficulties[difficulty];
   state.elapsed += dt;
-  if (state.elapsed >= settings.interval && state.objects.length < settings.maxObjects) {spawn(state); state.elapsed = 0;}
+  if (state.elapsed >= settings.interval && state.objects.length < settings.maxObjects && state.spawned<state.goal) {spawn(state); state.elapsed = 0;}
   for (const object of state.objects) if (!(typeof held==='object'&&held!==null?held.has(object.id):object.id===held)) object.y = Math.min(476, object.y + settings.speed * dt);
 }
 export function sort(state: GameState, id: number, bin: Category): boolean {
@@ -37,6 +37,6 @@ export function sort(state: GameState, id: number, bin: Category): boolean {
   if (!object || state.complete || !classify(object.category, bin)) return false;
   state.objects = state.objects.filter(item => item.id !== id);
   state.score++;
-  state.complete = state.score >= config.goal;
+  state.complete = state.score >= state.goal;
   return true;
 }

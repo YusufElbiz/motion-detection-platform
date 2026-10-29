@@ -1,0 +1,17 @@
+{
+  "ad": "topik_minik_dost",
+  "gorunen_ad": "Topik Minik Dost",
+  "cesit": 1,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "An original small cuddly Turkish forest creature with a soft rounded slightly husky voice, youthful gender neutral cartoon character, tender and mischievous, smiling with a little amused chuckle in the tone, expressive natural conversational rhythm, friendly unhurried native Turkish speech, clean studio recording, no background noise.",
+  "ses_yaratilirken_okutulan_metin": "Merhaba, ben Topik, ormanın minik sincap arkadaşıyım, seninle oyun oynamayı ve doğayı korumayı çok seviyorum. Haydi birlikte atıkları ayıralım, her birini doğru kutuya bırakalım, ormandaki hayvanlara yardım edelim ve sonunda kocaman bir sevinçle birbirimize teşekkür edelim!",
+  "tasarim_tohumu": 1653432708,
+  "okuma_tohumu": 1653432708,
+  "referans": "referans.wav",
+  "referans_sn": 17.76,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-10-25 18:53"
+}

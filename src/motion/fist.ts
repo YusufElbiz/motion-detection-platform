@@ -34,6 +34,7 @@ export class FistRecognizer {
   stable:HandPose='UNKNOWN';
   armed=false;
   confirmationMs=fistDefaults.confirmMs;
+  minimumSamples=2;
   lastConfirmationMs=0;
   private candidate?:HandPose;
   private since=0;
@@ -50,7 +51,7 @@ export class FistRecognizer {
     if(this.candidate!==pose){this.candidate=pose;this.since=now;this.samples=0;}
     this.samples++;this.state=pose==='CLOSED'?'CLOSING':'OPENING';
     const progress=Math.min(1,(now-this.since)/Math.max(40,this.confirmationMs));
-    if(progress>=1&&this.samples>=2){
+    if(progress>=1&&this.samples>=this.minimumSamples){
       const previous=this.stable;this.lastConfirmationMs=now-this.since;this.stable=pose;this.state=pose;this.candidate=undefined;
       if(pose==='OPEN'){released=previous==='CLOSED'&&this.armed;this.armed=true;}
       else grabbed=previous==='OPEN'&&this.armed;

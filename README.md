@@ -117,3 +117,146 @@ docs/screenshots/completed.png
 ```
 
 `node_modules/` and `dist/` are generated installation/build outputs and ignored by Git.
+
+## At�k say�s� ve Topik
+
+Men�de **At�k say�s�** alan�ndan 1�40 aras�nda tur uzunlu�u se�ilir. Puan hedefi,
+�retilen toplam nesne say�s� ve sonu� mesaj� bu se�imi izler; yeniden oyna ayn�
+say�yla ba�lar. Varsay�lan 8 at�kt�r.
+
+Kaplumba�a Topik oyun boyunca k�sa te�vik mesajlar�, finalde geri d�n���m�n
+faydas�n� anlatan k�sa bir konu�ma sunar. Konu�malar her zaman yaz�l�d�r;
+sesli okuma taray�c�n�n Speech Synthesis �zelli�ini ve cihazdaki T�rk�e ses
+deste�ini kullan�r. T�rk�e sesin kalitesi/kullan�labilirli�i ve internet
+ gereksinimi cihaz�n konu�ma motoruna ba�l�d�r. Ses d��mesi hem m�zik
+ipu�lar�n� hem maskot konu�mas�n� kapat�r. Men�ye d�n��, duraklatma ve pencere
+oda�� kayb� konu�may� keser. Finalde **Tekrar dinle** d��mesi bulunur.
+
+`node scripts/mascot-browser-test.mjs` geli�tirme sunucusu 5173 portundayken
+hedef se�imi, maskot mesajlar�, sonu�, yeniden oynama ve sessize almay� denetler.
+Test ses API �a�r�lar�n� taklit eder; fiziksel cihazda T�rk�e sesi do�rulamaz.
+
+### Topik kutuya rehberlik eder
+
+Topik arka planda dola��r; do�ru e�le�tirmede z�play�p y�ld�zlarla sevinir.
+Yanl�� kutuya b�rak�lan nesnenin do�ru kutusuna gidip o kutuyu parlat�r.
+Cam i�in �Camlar buraya! Ye�il kutuya, birlikte atal�m!� der; di�er ��
+malzemenin de kendi renk ve kutu ipucu vard�r. Bu yard�m, eski yanl�� kutu
+konu�mas�n� hemen keser; do�ru e�le�tirme de yard�m konu�mas�n� kutlamayla de�i�tirir.
+
+Ses dosyalar� d�rt rehberlik c�mlesiyle birlikte toplam on adettir.
+GitHub ara�t�rmas�, �nerilen yeni ses motoru ve kurulumun bekleyen onay�:
+[docs/TOPIK_VOICE_RESEARCH.md](docs/TOPIK_VOICE_RESEARCH.md).
+
+### G�ncel karakter: Sincap Topik
+
+Kaplumba�a yerine �zg�n bir sincap �izimi kullan�l�r. Topik arka ortada
+bekler; en yeni nesneyi g�zleri ve hafif ba� e�imiyle izler. Yard�m gerekti�inde
+ilgili kutuya yakla��r, yard�m veya kutlama sonras�nda merkeze d�ner. Nesne
+ve kutular�n arkas�ndad�r; t�klamay� engellemez. Kuyruk, g�z k�rpma, nefes ve
+z�plama katmanlar� ayr� animasyonlard�r. �nceki �arka planda dola��r� a��klamas�
+bu davran��la de�i�tirilmi�tir.
+
+### Yeni karakter sesi �rnekleri
+
+`http://127.0.0.1:5173/voice-auditions.html` adresinde VoxCPM2 ile tasarlanan
+�� ayr� sincap sesi kar��la�t�r�l�r. Her biri ayn� be� oyun c�mlesini s�yler.
+Eski sesi dinleme se�ene�i de vard�r; iki kay�t ayn� anda �almaz.
+Model ve ara�lar yaln�z haz�rl�k i�in `.tools/` alt�nda tutulur, `dist/` i�ine
+al�nmaz. Yeni sesin oyunun b�t�n c�mlelerine uygulanmas� kullan�c� se�imine ba�l�d�r.
+
+`node scripts/voice-auditions-browser-test.mjs` �rnek kay�tlar� ve oynat�c�y�
+do�rular. Bu test sesin �znel do�all���n� �l�mez.
+
+### Se�ilen ses ve g�ncel hareketler
+
+Kullan�c� ���nc� sesi se�ti. Oyun art�k `public/audio/topik/voice-3/` i�indeki
+on konu�may� �alar; referans ve tohum 3637895427 korunur. Ses biraz k�s�ld�
+(-21 LUFS hedefi, oynat�c� 0,8); hafif frekans s�zme ve netlik ayar� eklendi.
+Perde ve h�z de�i�medi. `scripts/generate-selected-topik.py` bu paketi haz�rlar.
+
+Sincab�n dinlenme pozunda iki kolu a�a��dad�r. Selam verirken el sallar,
+yard�mda kutuyu i�aret edip ba��yla onaylar, y�r�rken ayaklar�n� s�rayla
+kald�r�r. Do�ru e�le�tirmede iki kolunu kald�rarak z�plar ve g�zleri g�ler;
+g�lgesi yerde kal�p k���l�r. Kulak, kuyruk ve k���k pati hareketleri ayr�
+katmanlard�r. Azalt�lm�� hareket tercihi bu hareketleri de kapat�r.
+
+### Ek karakter sesi denemeleri
+
+`/voice-examples.html` sayfas�nda �� farkl� ses tarifiyle haz�rlanan yeni
+�rnekler bulunur: 4 yumu�ak masal, 5 ne�eli �izgi film, 6 oyuncu minik dost.
+Her biri ayn� be� oyun c�mlesini, kendisi i�in �retilen sentetik referans ve
+sabit tohumla okur. Perde ve h�z de�i�ikli�i uygulanmaz; ses d�zeyi kar��la�t�rma
+ i�in -21 LUFS hedefiyle normalize edilir. Oyundaki se�ili ���nc� ses korunur.
+
+Kaynaklar ve �retim bilgileri `public/audio/topik/auditions-2/manifest.json`,
+WAV ��kt�lar� `output/voice-auditions/round-2/` alt�nda tutulur.
+`node scripts/extra-voices-browser-test.mjs` dosyalar�n oynad���n� ve bir
+�rnek ba�lat�l�nca di�erinin durdu�unu denetler.
+
+### Arka plan m�zi�i
+
+Kullan�c�n�n g�nderdi�i `Do�aya_Dost_Ol.mp3`, `public/audio/music/dogaya-dost-ol.mp3`
+olarak oyuna eklendi. Turla ba�lar, d�ng�de �alar; maskot konu�urken k�s�l�r ve
+konu�ma bitince eski d�zeyine d�ner. Duraklatmada kald��� konum korunur; men�,
+yeni tur ve tur sonunda s�f�rlan�r. Ses d��mesi t�m sesleri birlikte kontrol eder.
+`node scripts/music-browser-test.mjs` bu davran��lar� ger�ek sesle denetler.
+
+Mevcut motor d���ndaki seslendirme alternatifi, haz�r karakter tarifi ve k�sa
+oyunculuk denemesi: [docs/TOPIK_SESLENDIRME_ALTERNATIFI.md](docs/TOPIK_SESLENDIRME_ALTERNATIFI.md).
+ElevenLabs ile hen�z kay�t �retilmedi; oyunda se�ilmi� ���nc� ses korunur.
+
+### Do�a do�ru e�le�tirmelerle canlan�r
+
+Tur kirli ve solgun bir bah�ede ba�lar. �lerleme `do�ru e�le�tirme / se�ilen
+at�k say�s�` oran�d�r. Her do�ruda dekoratif ��pler azal�r, g�ky�z� ve a�a�lar
+canlan�r, �i�ekler belirir. Son b�l�mde ku�lar ve bir kelebek g�r�n�r. Yanl��
+kutu do�ay� geriye g�t�rmez ve ilerletmez. Tur tamamland���nda ��pler ve sis
+biter; yeniden oynama �evreyi ba�lang�� durumuna d�nd�r�r. Azalt�lm�� hareket
+tercihinde renk/opa�l�k ge�i�leri ile ku�/kelebek hareketleri kapat�l�r.
+
+�izim ve ilerleme: `src/environment.ts`. Dekoratif ��pler etkile�im almaz;
+oynanabilir PNG at�klar �ndeki ayr� katmanda kal�r. �evre yaln�z skor veya
+hedef de�i�ti�inde g�ncellenir.
+
+`node scripts/environment-browser-test.mjs` yanl�� kutu, kademeli de�i�im,
+temiz biti�, yeniden oynama, 1/4/40 hedefleri ve azalt�lm�� hareketi denetler.
+�nce/yar�/son g�rselleri `docs/screenshots/environment-*.png` alt�ndad�r.
+
+### Daha sakin konu�ma ak���
+
+Sesli te�vik i�in hem son te�vikten sonra en az d�rt yeni do�ru e�le�tirme,
+hem de k�rk saniye aktif oyun s�resi gerekir. Yanl�� kutu yard�m�ndan sonra da
+bu s�re beklenir. Duraklat�lan zaman say�lmaz; k�sa turlar hi� ara te�vik
+olmadan bitebilir. Sincab�n kutlamas� ve g�rsel geri bildirim devam eder.
+Giri�, kutu yard�m� ve final konu�malar� korunur.
+
+Arka plandaki m�zi�in yinelenen �Merhaba, ben Topik� c�mlesi ��kar�ld�.
+Oyun `dogaya-dost-ol-no-intro.mp3` dosyas�n� �alar; orijinal dosya korunur.
+
+### Ba�parmak kimlik kontrol� ve daha kararl� tutma
+
+Oyun, model ve iz s�reklili�ine ek olarak ba�parma��n avuca g�re y�n�n�
+kar��la�t�r�r. Sa�/sol, ekran�n sa��nda/solunda olmaya g�re atanmaz. A��k
+avu�tan yumru�a ve yumruktan a��lmaya ge�i� en az d�rt �rnek ve 120 ms ile
+do�rulan�r. �nceden a��k elle nesnenin �st�nde 100 ms bulunmadan havada
+kapan�p yakla�mak nesneyi tutmaz. Geli�tirici panelinde 120/160/200/260 ms
+se�enekleri vard�r. K�sa kimlik belirsizli�i eldeki nesneyi hemen d���rmek
+yerine dondurur; uzun kay�pta veya bast�r�lan elde ta��ma puans�z iptal edilir.
+Ayr�nt�lar ve fiziksel kamera testinin s�n�rlar�: [docs/HAND_IDENTITY.md](docs/HAND_IDENTITY.md).
+
+### Tut-b�rak kullan�labilirlik d�zeltmesi
+
+Fiziksel denemeden gelen geri bildirim �zerine zorunlu a��k el beklemesi ve
+4 �rnek/120 ms alt s�n�r� kald�r�ld�. G�ncel varsay�lan 2 �rnek/60 ms;
+panel se�enekleri 60/90/120/160 ms. A��k elle yakla� � yumruk yap � a��p b�rak
+ak��� geri getirildi. Sa�/sol ba�parmak do�rulamas� korunur. Yeni regresyon
+testi, yaln�z bir a��k-el �rne�iyle nesneye yakla��nca beklemeden tutmay� ve
+tek karelik hatal� a��lman�n nesneyi b�rakmamas�n� denetler.
+
+### Automatic start and mascot instructions
+
+After calibration, two distinct visible hands held for 400 ms finish setup.
+No gesture is required. Topik explains the selected controls before waste falls.
+Bin checks use the visible object centre, with 32 px hand / 12 px mouse tolerance.
+Wrong materials still fail. Covered by unit and synthetic-hand browser tests.

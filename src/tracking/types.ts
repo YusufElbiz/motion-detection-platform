@@ -12,7 +12,7 @@ export interface TrackedHand extends Detection {
   thumbTip: Point;
   palmCenter: Point;
 }
-export interface TrackingFrame {timestamp: number; hands: TrackedHand[]; ambiguous: boolean}
+export interface TrackingFrame {timestamp: number; hands: TrackedHand[]; ambiguous: boolean;suppressedHandIds?:number[]}
 export interface InferenceResult {detections: Detection[]; latencyMs: number; timestamp: number; transferMs?:number}
 export interface TrackingBackend {
   initialize(delegate: 'CPU' | 'GPU',engine?:TrackingEngine): Promise<'CPU' | 'GPU'>;

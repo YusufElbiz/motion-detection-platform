@@ -40,6 +40,7 @@ export class CartoonArms {
       for(const name of ['sleeve','sleeve-outline'])this.attribute(node.back.querySelector(`.${name}`)!,'d',`M${anchor.x} ${anchor.y} L${sleeveEnd.x} ${sleeveEnd.y}`);
       const art=node.back.querySelector<SVGGElement>('.hand-art')!;
       this.attribute(art,'transform',`translate(${x} ${y}) rotate(${node.angle})`);
+      for(const pose of ['.open-art','.fist-art'])this.attribute(art.querySelector(pose)!,'transform',`scale(${node.slot===0?-1:1} 1)`);
       this.attribute(art.querySelector('.open-art')!,'opacity',String(1-node.closed));this.attribute(art.querySelector('.fist-art')!,'opacity',String(node.closed));
       const lost=cursor.state==='TRACKING_LOST',unknown=cursor.gesture==='UNKNOWN';
       this.attribute(node.back,'opacity',lost?'.22':unknown?'.55':'1');

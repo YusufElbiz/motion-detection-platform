@@ -2,11 +2,16 @@ import {categories,config,type Category,type Difficulty} from './config.ts';
 import {advance,createState,spawn,wasteName} from './game.ts';
 import {attachMouse,type GameInputEvent} from './input.ts';
 import {AudioFeedback} from './audio.ts';
+import {EnvironmentProgress} from './environment.ts';
+import {EncouragementSchedule} from './encouragement.ts';
+import {MascotSpeech,encouragements,endingSpeech,tutorialMessages,squirrelArt} from './mascot.ts';
+import {MascotDirector,binGuideSpeech} from './mascot-director.ts';
 import {wasteArt} from './art.ts';
 import {InteractionController,type InteractionResult} from './interaction.ts';
 import {MotionInput} from './motion/input.ts';
 import {TrackingSession} from './tracking/session.ts';
 import {CalibrationManager} from './tracking/calibration.ts';
+import {TwoHandsReady} from './motion/readyStart.ts';
 import {mirrorPoint} from './tracking/coordinates.ts';
 import {CartoonArms} from './motion/arms.ts';
 import type {GrabMethod} from './motion/config.ts';
@@ -17,6 +22,19 @@ import './motion/style.css';
 export function mountGameScene(){
   const element=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
   const field=element('playfield');const audio=new AudioFeedback();
+  const environment=new EnvironmentProgress(document.querySelector<HTMLElement>('.game')!);
+  const encouragementSchedule=new EncouragementSchedule();let activeSeconds=0;
+  environment.update(0,config.goal);
+  const companion=element('mascot-companion');
+  const mascotDirector=new MascotDirector(companion,document.querySelector<HTMLElement>('.game')!);
+  const mascot=new MascotSpeech(companion,element('mascot-message'),()=>audio.muted,active=>audio.setVoiceActive('companion',active));
+  const resultMascot=new MascotSpeech(element('result'),element('result-speech'),()=>audio.muted,active=>audio.setVoiceActive('result',active));
+  element('hand-setup').insertAdjacentHTML('afterend',`<div id="instructions" class="overlay" hidden><div class="welcome instruction-card"><div class="instruction-mascot">${squirrelArt('instructions')}</div><span class="pill">TOPİK ANLATIYOR</span><p id="instruction-text" role="status"></p><small>Anlatım bitince oyun kendiliğinden başlayacak.</small><button id="instruction-skip" class="plain-game-button" type="button">Anlatımı geç</button></div></div>`);
+  const tutorialMascot=new MascotSpeech(element('instructions'),element('instruction-text'),()=>audio.muted,active=>audio.setVoiceActive('instructions',active));
+  let introducing=false,introSeconds=0,introLimit=24;
+  element('mascot-repeat').onclick=()=>{mascot.stop();resultMascot.say(endingSpeech,true);};
+  const countInput=element<HTMLInputElement>('waste-count');
+  countInput.onchange=()=>{countInput.value=String(createState(countInput.valueAsNumber).goal);};
   let state=createState(),running=false,paused=false,difficulty:Difficulty='relaxed';
   let mode:'mouse'|'hand'='mouse',preparing=false,setupResume=false,messageUntil=0,previous=performance.now(),lastMetrics=0;
   let noHandSince=0;
@@ -25,6 +43,8 @@ export function mountGameScene(){
   const arms=new CartoonArms(document.querySelector<HTMLElement>('.game')!,element('hand-cursors'));
   const video=element<HTMLVideoElement>('motion-video');
   const session=new TrackingSession(video);const calibration=new CalibrationManager();
+  const handsReady=new TwoHandsReady();
+  element('setup-progress').insertAdjacentHTML('afterend','<p id="setup-ready-status" class="setup-ready-status" role="status">Alan ayarı tamamlanınca iki elini göster; oyun otomatik başlayacak.</p>');
   const motion=new MotionInput(interaction,dispatch);
   session.processor.lossTimeoutMs=motion.settings.lossGraceMs+150;
 
@@ -39,7 +59,7 @@ export function mountGameScene(){
     session.inferenceWidth=Number(element<HTMLSelectElement>('game-inference-width').value);
   };
   element<HTMLSelectElement>('grab-method').insertAdjacentHTML('afterbegin','<option value="fist" selected>Elini kapat, tut · elini aç, bırak</option>');
-  settings.insertAdjacentHTML('beforeend',`<details class="gesture-lab"><summary>Geliştirici · Hareket tanısı ve ince ayarlar</summary><div class="motion-settings-grid"><label>Algılama yaklaşımı<select id="gesture-engine"><option value="gestures">Model + 3B parmak geometrisi · önerilen</option><option value="landmarks">Noktalardan geometri · karşılaştırma</option></select></label><label>Jest doğrulama süresi<select id="fist-confirm"><option value="50">50 ms aday</option><option value="60" selected>60 ms aday</option><option value="70">70 ms aday</option><option value="100">100 ms aday</option></select></label><label>Model giriş skoru<input id="fist-confidence" type="range" min="0.5" max="0.9" value="0.6" step="0.05"></label><label>Dururken yumuşatma (ms)<input id="smooth-still" type="range" min="20" max="90" value="55" step="5"></label><label>Hızlı harekette yumuşatma (ms)<input id="smooth-fast" type="range" min="0" max="20" value="8" step="2"></label><label>Uyarlanır yumuşatma<input id="smooth-enabled" type="checkbox" checked></label></div><p>Yaklaşımı değiştirmek için ana menüye dönüp kamerayı kapatın. Aynı anda yalnız bir izleme modeli çalışır. Geometri uyum oranı, modelin olasılık skoru değildir.</p><label class="debug-toggle"><input id="gesture-debug" type="checkbox"> Canlı teknik bilgileri göster (yalnız bu bölümde)</label><pre id="gesture-details" hidden></pre></details>`);
+  settings.insertAdjacentHTML('beforeend',`<details class="gesture-lab"><summary>Geliştirici · Hareket tanısı ve ince ayarlar</summary><div class="motion-settings-grid"><label>Algılama yaklaşımı<select id="gesture-engine"><option value="gestures">Model + 3B parmak geometrisi · önerilen</option><option value="landmarks">Noktalardan geometri · karşılaştırma</option></select></label><label>Jest doğrulama süresi<select id="fist-confirm"><option value="60" selected>60 ms · hızlı</option><option value="90">90 ms · dengeli</option><option value="120">120 ms · daha kararlı</option><option value="160">160 ms · daha kararlı</option></select></label><label>Model giriş skoru<input id="fist-confidence" type="range" min="0.5" max="0.9" value="0.6" step="0.05"></label><label>Dururken yumuşatma (ms)<input id="smooth-still" type="range" min="20" max="90" value="55" step="5"></label><label>Hızlı harekette yumuşatma (ms)<input id="smooth-fast" type="range" min="0" max="20" value="8" step="2"></label><label>Uyarlanır yumuşatma<input id="smooth-enabled" type="checkbox" checked></label></div><p>Yaklaşımı değiştirmek için ana menüye dönüp kamerayı kapatın. Aynı anda yalnız bir izleme modeli çalışır. Geometri uyum oranı, modelin olasılık skoru değildir.</p><label class="debug-toggle"><input id="gesture-debug" type="checkbox"> Canlı teknik bilgileri göster (yalnız bu bölümde)</label><pre id="gesture-details" hidden></pre></details>`);
   function feedback(message:string,category?:Category){
     element('feedback').textContent=message;element('feedback').style.borderColor=category?categories[category].color:'#91c99a';
     element('feedback').classList.add('visible');messageUntil=performance.now()+3800;
@@ -53,27 +73,36 @@ export function mountGameScene(){
       // IDs restart each round. A reused DOM node must show the NEW material
       // and variant, otherwise randomized rounds retain the old icon/label.
       if(node.dataset.category!==object.category||node.dataset.variant!==(object.variant??'')){
-        node.innerHTML=wasteArt(object.category,object.variant);node.setAttribute('aria-label',wasteName(object)+' — kutuya taşı');node.title=wasteName(object);node.dataset.category=object.category;node.dataset.variant=object.variant??'';
+        node.innerHTML=wasteArt(object.category,object.variant);const label=document.createElement('span');label.className='waste-name';label.textContent=wasteName(object);node.append(label);node.setAttribute('aria-label',wasteName(object)+' — kutuya taşı');node.title=wasteName(object);node.dataset.category=object.category;node.dataset.variant=object.variant??'';
       }
       node.style.left=`${object.x/config.width*100}%`;node.style.top=`${object.y/config.height*100}%`;
       node.classList.toggle('held',held.has(object.id));node.classList.toggle('grab-hover',hovered.has(object.id));
     }
     element('score').textContent=String(state.score);
+    element('score-goal').textContent=String(state.goal);
+    environment.update(state.score,state.goal);
     const bins=new Set(interaction.binHighlights.values());
     document.querySelectorAll<HTMLElement>('.bin').forEach(bin=>bin.classList.toggle('hovered',bins.has(bin.dataset.category as Category)));
   }
   function handleResult(result:InteractionResult){
     if(result.kind==='correct'){
+      const wasGuiding=!!companion.dataset.guideCategory;
+      mascotDirector.celebrate();
+      if(!state.complete&&encouragementSchedule.take(state.score,activeSeconds))mascot.say(encouragements[Math.floor(state.score/4)%encouragements.length],true);
+      else if(wasGuiding)mascot.stop();
       audio.play(true);feedback(['Harika! Doğa sana teşekkür ediyor! 🌿','Yaşasın! Bir yıldız daha kazandın! ★','Çok güzel! Doğru kutuyu buldun! ♻'][state.score%3]);
       const bin=document.querySelector<HTMLElement>(`.bin[data-category="${result.bin}"]`)!;bin.classList.add('celebrate');setTimeout(()=>bin.classList.remove('celebrate'),650);
     }else if(result.kind==='incorrect'){
+      encouragementSchedule.postpone(activeSeconds);
+      mascotDirector.guide(result.object.category);
+      mascot.say(binGuideSpeech[result.object.category],true);
       audio.play(false);feedback(`Birlikte deneyelim! ${wasteName(result.object)} → ${categories[result.object.category].label} kutusu.`,result.object.category);
     }else if(result.kind==='grabbed'&&mode==='hand')feedback(motion.settings.method==='fist'?'Yakaladın! Yumruğun kapalı taşı, elini açıp bırak.':motion.settings.method==='dwell'?'Yakaladın! Kutunun içinde biraz bekle.':'Yakaladın! Kutunun üstünde parmaklarını aç.');
   }
   function dispatch(event:GameInputEvent){
     if((mode==='mouse')!==(event.source==='mouse'))return;
     const result=interaction.dispatch(event);if(result)handleResult(result);
-    if(state.complete&&running){running=false;interaction.disable();motion.disable();session.stop();element('result').hidden=false;element<HTMLButtonElement>('again').focus();}
+    if(state.complete&&running){audio.stopMusic();running=false;interaction.disable();motion.disable();session.stop();mascot.hide();element('result-count').textContent=`${state.goal} atığı doğru kutularla buluşturdun!`;element('result').hidden=false;resultMascot.say(endingSpeech,true);element<HTMLButtonElement>('again').focus();}
     // Rendering is coalesced into the existing scene animation frame.
     if(event.source==='mouse'||state.complete)render();
   }
@@ -91,33 +120,63 @@ export function mountGameScene(){
     }else noHandSince=0;
   }
   function showSetup(message?:string){
-    const guides={idle:'Ellerimizi hazırlayalım.',one:'Bir elini kaldır ve biraz göster. ✋',two:'Şimdi iki elini birlikte göster. 🙌',reach:motion.settings.method==='fist'?'Açık avuçlarını rahatça sola, sağa, yukarı ve aşağı taşı. Hazır olunca düğmeye bas.':'İşaret parmaklarını rahatça sola, sağa, yukarı ve aşağı uzat. Hazır olunca düğmeye bas.',ready:'Oyun alanın hazır!'};
+    const guides={idle:'Ellerimizi hazırlayalım.',one:'Bir elini kaldır ve biraz göster. ✋',two:'Şimdi iki elini birlikte göster. 🙌',reach:motion.settings.method==='fist'?'Açık avuçlarını rahatça sola, sağa, yukarı ve aşağı taşı. Alanı tanıdıktan sonra iki elini birlikte göster.':'İşaret parmaklarını rahatça sola, sağa, yukarı ve aşağı uzat. Alanı tanıdıktan sonra iki elini birlikte göster.',ready:'Oyun alanın hazır!'};
     element('setup-guide').textContent=message??guides[calibration.stage];
     element<HTMLProgressElement>('setup-progress').value=calibration.progress;
     element<HTMLButtonElement>('setup-finish').disabled=!session.active||calibration.stage!=='reach';
   }
+  function showInstructions(){
+    introducing=true;introSeconds=0;introLimit=audio.muted?7:24;
+    running=false;paused=false;preparing=false;interaction.disable();motion.disable();session.suspended=true;
+    mascot.hide();resultMascot.hide();mascotDirector.reset();
+    state=createState(countInput.valueAsNumber);interaction.replaceState(state);render();
+    for(const id of ['menu','result','paused','hand-setup'])element(id).hidden=true;
+    element('motion-preview').classList.remove('visible');
+    audio.stopMusic();audio.startMusic();
+    tutorialMascot.say(tutorialMessages[mode==='mouse'?'mouse':motion.settings.method],true,()=>{
+      if(!introducing)return;
+      if(introSeconds<1)introLimit=7;else finishInstructions();
+    });
+  }
+  function finishInstructions(){
+    if(!introducing)return;
+    if(document.hidden){introLimit=introSeconds+.2;return;}
+    introducing=false;tutorialMascot.hide();beginRound();
+  }
+  element('instruction-skip').onclick=finishInstructions;
   function beginRound(){
-    interaction.disable();motion.disable();state=createState();interaction.replaceState(state);interaction.enable();
+    handsReady.reset();
+    activeSeconds=0;encouragementSchedule.reset();
+    mascotDirector.reset();
+    mascot.hide();resultMascot.stop();
+    interaction.disable();motion.disable();state=createState(countInput.valueAsNumber);countInput.value=String(state.goal);interaction.replaceState(state);interaction.enable();
     running=true;paused=false;preparing=false;session.suspended=false;
     difficulty=element<HTMLSelectElement>('difficulty').value as Difficulty;
     for(const id of ['menu','result','paused','hand-setup'])element(id).hidden=true;
     element('motion-preview').classList.remove('visible');
     element('feedback').classList.remove('visible');
     if(mode==='hand'){motion.bounds=calibration.bounds;motion.aspect=video.videoWidth/video.videoHeight||4/3;motion.enable();}
+    audio.startMusic();
+    companion.hidden=false;
     spawn(state);render();feedback(mode==='mouse'?'Atığı tut, resmine benzeyen kutuya bırak! ☝':motion.settings.method==='fist'?'Açık elinle yaklaş. Yumruk yapıp yakala, elini açıp bırak!':motion.settings.method==='dwell'?'Elini atığın üstünde beklet. Halka dolunca yakalarsın!':'Önce parmaklarını aç. Atığın üstünde birleştirerek tut!');
   }
   async function start(){
-    if(mode==='mouse'){session.stop();beginRound();return;}
+    handsReady.reset();introducing=false;tutorialMascot.hide();
+    if(mode==='mouse'){session.stop();showInstructions();return;}
     interaction.disable();motion.disable();preparing=true;running=false;paused=false;setupResume=false;
     for(const id of ['menu','result','paused'])element(id).hidden=true;
     element('hand-setup').hidden=false;element('motion-preview').classList.add('visible');
     showSetup('Kamerayı hazırlıyoruz…');
     session.engine=motion.settings.method==='fist'?element<HTMLSelectElement>('gesture-engine').value as TrackingEngine:'landmarks';
     if(!await session.start())return;
-    if(calibration.stage==='ready'){beginRound();return;}
+    if(calibration.stage==='ready'){showInstructions();return;}
     calibration.start();showSetup();
   }
   function returnToMenu(){
+    handsReady.reset();introducing=false;tutorialMascot.hide();
+    audio.stopMusic();
+    mascotDirector.stop();
+    mascot.hide();resultMascot.stop();
     running=false;paused=false;preparing=false;interaction.disable();motion.disable();session.stop();
     for(const id of ['result','paused','hand-setup'])element(id).hidden=true;
     element('menu').hidden=false;element('motion-preview').classList.remove('visible');render();renderCursors();
@@ -130,18 +189,22 @@ export function mountGameScene(){
   }
   async function setPaused(value:boolean){
     if(!running||state.complete)return;
-    if(value){paused=true;interaction.disable();motion.disable();session.suspended=true;element('paused').hidden=false;render();renderCursors();return;}
+    if(value){audio.pauseMusic();mascot.stop();companion.hidden=true;paused=true;interaction.disable();motion.disable();session.suspended=true;element('paused').hidden=false;render();renderCursors();return;}
     if(mode==='hand'&&!session.active){
       element<HTMLButtonElement>('resume').disabled=true;
       const ready=await session.start();element<HTMLButtonElement>('resume').disabled=false;if(!ready||!running)return;
     }
-    paused=false;session.suspended=false;interaction.enable();if(mode==='hand')motion.enable();element('paused').hidden=true;
+    paused=false;session.suspended=false;audio.startMusic();interaction.enable();if(mode==='hand')motion.enable();element('paused').hidden=true;companion.hidden=false;
   }
   session.onFrame=frame=>{
     if(mode!=='hand')return;
     if(preparing){
       if(calibration.stage==='one'||calibration.stage==='two'||calibration.stage==='reach'){
         calibration.observe(frame.ambiguous?[]:frame.hands.map(hand=>mirrorPoint(motion.settings.method==='fist'?hand.palmCenter:hand.indexTip,true)),frame.timestamp);showSetup();
+        const ready=calibration.canFinish;
+        const confirmed=handsReady.update(frame,calibration.stage==='reach'&&ready);
+        element('setup-ready-status').textContent=handsReady.progress>0?'İki elini gördüm! Topik birazdan anlatacak…':ready?'İki elini göster; oyun otomatik başlayacak.':'Önce ellerini sola, sağa, yukarı ve aşağı uzat.';
+        if(confirmed){element<HTMLButtonElement>('setup-finish').click();return;}
       }
       element('setup-hands').textContent=frame.hands.length?`✋ ${frame.hands.length===1?'Bir elini gördük!':'İki elini gördük!'}`:'✋ Ellerini göster';
     }else if(running&&!paused){
@@ -162,16 +225,20 @@ export function mountGameScene(){
     }
   };
   element('start').onclick=()=>{void start();};element('again').onclick=()=>{void start();};
-  element('restart').onclick=()=>{if(mode==='hand'&&session.active&&calibration.stage==='ready')beginRound();else void start();};
+  element('restart').onclick=()=>{if(mode==='hand'&&session.active&&calibration.stage==='ready')showInstructions();else void start();};
   element('home').onclick=returnToMenu;element('setup-cancel').onclick=returnToMenu;
   element('choose-mouse').onclick=()=>chooseMode('mouse');element('choose-hand').onclick=()=>chooseMode('hand');
-  element('setup-finish').onclick=()=>{
+  function finishHandSetup(){
+    if(!preparing||mode!=='hand'||!session.active)return;
     if(!calibration.finish()){showSetup('Biraz daha uzanalım: sola, sağa, yukarı ve aşağı. Sonra yeniden deneyelim.');return;}
+    handsReady.reset();
     motion.bounds=calibration.bounds;
-    if(setupResume){preparing=false;running=true;paused=false;session.suspended=false;interaction.enable();motion.enable();element('hand-setup').hidden=true;element('motion-preview').classList.remove('visible');}
-    else beginRound();
-  };
+    if(setupResume){preparing=false;running=true;paused=false;companion.hidden=false;session.suspended=false;audio.startMusic();interaction.enable();motion.enable();element('hand-setup').hidden=true;element('motion-preview').classList.remove('visible');}
+    else showInstructions();
+  }
+  element('setup-finish').onclick=finishHandSetup;
   element('recalibrate').onclick=async()=>{
+    handsReady.reset();
     if(mode!=='hand')return;setupResume=running;running=false;paused=false;preparing=true;interaction.disable();motion.disable();
     for(const id of ['menu','result','paused'])element(id).hidden=true;element('hand-setup').hidden=false;element('motion-preview').classList.add('visible');
     calibration.start();session.suspended=false;if(!session.active&&!await session.start())return;showSetup();
@@ -202,12 +269,12 @@ export function mountGameScene(){
   }
   for(const id of ['fist-confirm','fist-confidence','smooth-still','smooth-fast','smooth-enabled'])element(id).onchange=tuneGestures;
   element<HTMLInputElement>('gesture-debug').onchange=()=>{element('gesture-details').hidden=!element<HTMLInputElement>('gesture-debug').checked;};
-  element('sound').onclick=()=>{audio.muted=!audio.muted;element('sound').textContent=audio.muted?'♪̸':'♫';element('sound').setAttribute('aria-label',audio.muted?'Sesi aç':'Sesi kapat');element('sound').setAttribute('aria-pressed',String(audio.muted));};
+  element('sound').onclick=()=>{audio.muted=!audio.muted;if(audio.muted){mascot.stop();resultMascot.stop();tutorialMascot.stop();if(introducing)introLimit=introSeconds+7;}element('sound').textContent=audio.muted?'♪̸':'♫';element('sound').setAttribute('aria-label',audio.muted?'Sesi aç':'Sesi kapat');element('sound').setAttribute('aria-pressed',String(audio.muted));};
   element('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.querySelector<HTMLElement>('.game')!.requestFullscreen();}catch{feedback('Tam ekran açılamadı. Pencereyi büyütebilirsin.');}};
   element('pause').onclick=()=>{void setPaused(!paused);};element('resume').onclick=()=>{void setPaused(false);};
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){void setPaused(true);if(mode==='hand')session.stop();}});
-  window.addEventListener('blur',()=>{void setPaused(true);});
-  window.addEventListener('pagehide',()=>{interaction.disable();motion.disable();session.stop();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){audio.pauseMusic();mascot.stop();resultMascot.stop();tutorialMascot.stop();void setPaused(true);if(mode==='hand')session.stop();}});
+  window.addEventListener('blur',()=>{audio.pauseMusic();mascot.stop();resultMascot.stop();tutorialMascot.stop();void setPaused(true);});
+  window.addEventListener('pagehide',()=>{audio.stopMusic();mascot.stop();resultMascot.stop();tutorialMascot.stop();interaction.disable();motion.disable();session.stop();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape')void setPaused(!paused);});
   const trackingEntry=document.createElement('div');trackingEntry.className='tracking-entry';
   const trackingButton=document.createElement('button');trackingButton.id='tracking-open';trackingButton.textContent='Yetişkin / Öğretmen · El Takip Testi';
@@ -218,7 +285,8 @@ export function mountGameScene(){
   });
   function frame(now:number){
     const dt=(now-previous)/1000;previous=now;session.tick(now);
-    if(running&&!paused&&!state.complete){motion.tick(now);advance(state,dt,difficulty,interaction.heldIds);render();}
+    if(introducing&&!document.hidden){introSeconds+=Math.max(0,Math.min(dt,.05));if(introSeconds>=introLimit)finishInstructions();}
+    if(running&&!paused&&!state.complete){activeSeconds+=Math.max(0,Math.min(dt,.05));motion.tick(now);advance(state,dt,difficulty,interaction.heldIds);mascotDirector.tick(dt,state.objects);render();}
     renderCursors();
     if(now>messageUntil)element('feedback').classList.remove('visible');
     if(now-lastMetrics>250){

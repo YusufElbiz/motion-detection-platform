@@ -25,8 +25,9 @@ try{
     e.data.result.detections=window.__hands.map((h,index)=>{
      const options={rotation:90,tilt:65,...h};
      const landmarks=window.__makeHand(options);
+     if(h.ok){const closed=window.__makeHand({...options,closed:true});for(let i=5;i<=8;i++)landmarks[i]=closed[i];landmarks[4]={...landmarks[8]};}
      if(h.unknown){const opposite=window.__makeHand({...options,closed:!h.closed});for(const i of [5,9])for(let j=0;j<4;j++)landmarks[i+j]=opposite[i+j];}
-     return {landmarks,worldLandmarks:landmarks.map(p=>({x:p.x*4/3*.3,y:p.y*.3,z:p.z*4/3*.3})),handedness:index?'Left':'Right',handednessScore:.91,...(this.engine==='gestures'?{modelGesture:{label:'None',score:.96}}:{})};
+     return {landmarks,worldLandmarks:landmarks.map(p=>({x:p.x*4/3*.3,y:p.y*.3,z:p.z*4/3*.3})),handedness:index?'Left':'Right',handednessScore:.91,...(this.engine==='gestures'?{modelGesture:{label:h.thumbsUp?'Thumb_Up':'None',score:.96}}:{})};
     });
    });}
    postMessage(data,transfer){if(data.kind==='init')this.engine=data.engine??'landmarks';if(data.kind==='frame')window.__sentWidths.push(data.frame.width);return super.postMessage(data,transfer??[]);}
@@ -37,8 +38,18 @@ try{
  await page.locator('#choose-hand').click();await page.locator('#start').click();
  await page.waitForFunction(()=>document.querySelector('#setup-guide').textContent.includes('iki elini'),{},{timeout:45000});
  await page.evaluate(()=>{window.__hands=[{x:.3,y:.5,closed:false},{x:.7,y:.5,closed:false}];});await page.waitForFunction(()=>document.querySelector('#setup-finish').disabled===false);
+ await page.evaluate(()=>{window.__hands=[{x:.3,y:.5,thumbsUp:true,closed:true},{x:.7,y:.5,thumbsUp:true,closed:true}];});await page.waitForTimeout(1100);
+ assert.equal(await page.locator('#hand-setup').isVisible(),true,'two thumbs-up signs cannot bypass reach calibration');
  for(const [x,y]of [[.15,.15],[.85,.15],[.15,.85],[.85,.85]]){await page.evaluate(({x,y})=>{window.__hands=[{x,y,closed:false}];},{x,y});await page.waitForTimeout(900);}
- await page.locator('#setup-finish').click();await page.waitForFunction(()=>document.querySelector('.hand-cursor')?.dataset.gesture==='OPEN');
+ await page.evaluate(()=>{window.__hands=[{x:.3,y:.5,closed:false},{x:.7,y:.5,closed:false}];});
+ await page.waitForFunction(()=>document.querySelector('#hand-setup').hidden,{},{timeout:10000});
+ assert.equal(await page.locator('#instructions').isVisible(),true);assert.equal(await page.locator('.waste').count(),0);
+ assert.match(await page.locator('#instruction-text').textContent(),/yumruk/);
+ await page.locator('#instructions').waitFor({state:'hidden',timeout:30000});
+ await page.evaluate(()=>{window.__hands=[{x:.3,y:.5,closed:false}];});
+ await page.waitForFunction(()=>document.querySelectorAll('.hand-cursor').length===1);
+ await page.waitForFunction(()=>document.querySelector('.hand-cursor')?.dataset.gesture==='OPEN');
+ report.checks.push('two ordinary visible hands finish calibration; spoken mascot tutorial precedes gameplay, without any OK sign or button click');
  await page.waitForFunction(()=>/GPU|CPU/.test(document.querySelector('#motion-metrics').textContent));
  assert.equal(await page.locator('#game-delegate').isDisabled(),true);
  assert.match(await page.locator('#motion-metrics').textContent(),/P95/);

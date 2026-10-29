@@ -32,7 +32,7 @@ export class MotionInput {
   settings:MotionSettings={...motionConfig};
   bounds?:Bounds;
   aspect=4/3;
-  thresholds={...fistDefaults,confirmMs:gestureDefaults.openMs,modelEnter:gestureDefaults.threshold,modelKeep:gestureDefaults.threshold-.12};
+  thresholds={...fistDefaults,confirmMs:60,modelEnter:gestureDefaults.threshold,modelKeep:gestureDefaults.threshold-.12};
   records:{type:string;pointerId:string;at:number;confirmationMs:number;sampleToDispatchMs:number;state:MotionState;gesture:FistState;sampleGapMs:number}[]=[];
   private contexts=new Map<string,HandContext>();
   private lastFrame=-Infinity;
@@ -47,9 +47,13 @@ export class MotionInput {
   reset(){for(const context of this.contexts.values())this.emit(context,'input-disabled');this.contexts.clear();this.lastFrame=-Infinity;}
   update(frame:TrackingFrame,now=frame.timestamp){
     if(!this.enabled||frame.timestamp<=this.lastFrame)return;this.lastFrame=frame.timestamp;
+    for(const handId of frame.suppressedHandIds??[]){
+      const id=`hand-${handId}`,context=this.contexts.get(id);
+      if(context){this.emit(context,'input-disabled');this.contexts.delete(id);}
+    }
     if(frame.ambiguous){
       // Association during overlap is not trustworthy: never transfer a carry.
-      for(const context of this.contexts.values()){this.emit(context,'input-disabled');this.lose(context,now);}
+      for(const context of this.contexts.values()){if(this.settings.method!=='fist')this.emit(context,'input-disabled');this.lose(context,now);}
       this.tick(now);return;
     }
     const seen=new Set<string>();
@@ -125,13 +129,14 @@ export class MotionInput {
     this.emit(context,'input-disabled');context.position=position;context.lastSeen=now;context.readyAt=now;context.state='IDLE';context.progress=0;context.lostAt=undefined;context.recoveryAt=undefined;context.unknownAt=undefined;context.dwell.reset();context.pinch.reset();context.fist.reset();
   }
   private fist(context:HandContext,now:number){
-    context.fist.confirmationMs=this.thresholds.confirmMs;
+    context.fist.confirmationMs=Math.max(60,this.thresholds.confirmMs);
+    context.fist.minimumSamples=2;
+    const object=this.world.objectAt(context.position,context.id);
     const result=context.fist.update(context.measurement.pose,now);
     if(context.measurement.pose==='UNKNOWN'){
       context.unknownAt??=now;
       if(now-context.unknownAt>220){this.lose(context,now);return;}
     }else context.unknownAt=undefined;
-    const object=this.world.objectAt(context.position,context.id);
     if(result.grabbed&&object)this.emit(context,'grab-start',object.id);
     const held=this.world.heldBy(context.id)!==undefined;
     if(result.released&&held){this.emit(context,'grab-release');context.state='RELEASED';context.progress=0;return;}

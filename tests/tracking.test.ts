@@ -11,6 +11,35 @@ import type {Detection} from '../src/tracking/types.ts';
 const point=(x:number,y=.5)=>({x,y,z:-.01});
 const detection=(x:number,handedness='Left'):Detection=>({landmarks:Array.from({length:21},()=>point(x)),handedness,handednessScore:.9});
 
+test('anatomical side persists across screen center, reversed result order and brief model errors',()=>{
+  const p=new TrackingProcessor();p.predictive=true;
+  const first=p.update([detection(.8,'Right')],0).hands[0];
+  assert.equal(first.colorSlot,1);
+  for(let i=1;i<=7;i++){
+    const hand=p.update([detection(.8-i*.09,i===4?'Left':'Right')],i*33).hands[0];
+    assert.equal(hand.id,first.id);assert.equal(hand.handedness,'Right');assert.equal(hand.colorSlot,1);
+  }
+  const other=p.update([detection(.2,'Right'),detection(.8,'Left')],280);
+  assert.equal(other.hands[0].id,first.id);assert.equal(other.hands[1].colorSlot,0);
+});
+
+test('overlap keeps larger foreground palm, suppresses only the other identity, and restores sides',()=>{
+  const p=new TrackingProcessor();p.predictive=true;
+  const palm=(x:number,side:string,size:number)=>{
+    const d=detection(x,side);d.landmarks[5]={x:x-size,y:.5,z:0};d.landmarks[17]={x:x+size,y:.5,z:0};
+    d.landmarks[0]={x,y:.5+size,z:0};d.landmarks[9]={x,y:.5-size,z:0};return d;
+  };
+  const initial=p.update([palm(.3,'Left',.05),palm(.7,'Right',.08)],0);
+  const overlap=p.update([palm(.49,'Left',.05),palm(.51,'Right',.08)],40);
+  assert.equal(overlap.ambiguous,false);assert.equal(overlap.hands.length,1);
+  assert.equal(overlap.hands[0].id,initial.hands[1].id);
+  assert.deepEqual(overlap.suppressedHandIds,[initial.hands[0].id]);
+  const swapped=p.update([palm(.51,'Right',.08),palm(.49,'Left',.05)],80);
+  assert.equal(swapped.hands[0].id,initial.hands[1].id);
+  const separated=p.update([palm(.7,'Left',.05),palm(.3,'Right',.08)],120);
+  assert.equal(separated.hands.length,2);assert.equal(separated.hands[0].colorSlot,0);assert.equal(separated.hands[1].colorSlot,1);
+});
+
 test('normalization bounds x/y, preserves signed depth, handles non-finite input',()=>{
   assert.deepEqual(normalizePoint({x:-.2,y:1.4,z:-.2}),{x:0,y:1,z:-.2});
   assert.deepEqual(normalizePoint({x:NaN,y:Infinity,z:NaN}),{x:0,y:0,z:0});assert.equal(clamp01(.3),.3);
@@ -39,7 +68,7 @@ test('temporal association follows geometry through result reordering and handed
   const p=new TrackingProcessor();const initial=p.update([detection(.2,'Left'),detection(.8,'Right')],0);
   const next=p.update([detection(.79,'Left'),detection(.21,'Right')],40);
   assert.equal(next.hands[0].id,initial.hands[1].id);assert.equal(next.hands[1].id,initial.hands[0].id);
-  assert.equal(next.hands[0].handedness,'Left');assert.notEqual(next.hands[0].colorSlot,next.hands[1].colorSlot);
+  assert.equal(next.hands[0].handedness,'Right');assert.notEqual(next.hands[0].colorSlot,next.hands[1].colorSlot);
 });
 test('loss immediately removes active output; short occlusion reassociates, long loss starts fresh',()=>{
   const p=new TrackingProcessor();const first=p.update([detection(.2)],0).hands[0];

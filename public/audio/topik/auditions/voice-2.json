@@ -1,0 +1,17 @@
+{
+  "ad": "topik_sincap",
+  "gorunen_ad": "Topik Sincap",
+  "cesit": 2,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "A cheerful young Turkish cartoon squirrel with a youthful, light, soft voice, a playful smile in the voice, clear native Turkish pronunciation, warm encouraging delivery for preschool children, lively but unhurried pace, natural expressive intonation, clean studio recording with no background noise.",
+  "ses_yaratilirken_okutulan_metin": "Merhaba, ben Topik, senin minik sincap arkadaşınım! Haydi birlikte atıkları ayıralım, doğayı temiz tutup ormandaki dostlarımıza yardım edelim.",
+  "tasarim_tohumu": 1538085694,
+  "okuma_tohumu": 1538085694,
+  "referans": "referans.wav",
+  "referans_sn": 8.96,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-10-25 18:03"
+}

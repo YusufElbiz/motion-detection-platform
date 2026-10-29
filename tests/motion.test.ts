@@ -37,6 +37,20 @@ test('shared input keeps one owner and ignores duplicate grabs and releases',()=
   assert.equal(world.dispatch(event('grab-release','a',304,590))?.kind,'correct');
   assert.equal(world.dispatch(event('grab-release','a',304,590)),undefined);assert.equal(state.score,1);
 });
+
+test('off-centre mouse drop scores by the visible object centre and highlights the same bin',()=>{
+ const {state,world}=setup();
+ world.dispatch({...event('grab-start','a',245,200),source:'mouse'});
+ world.dispatch({...event('grab-held','a',440,590),source:'mouse'});
+ assert.equal(state.objects[0].x,395);assert.equal(world.binHighlights.get('a'),'plastic');
+ assert.equal(world.dispatch({...event('grab-release','a',440,590),source:'mouse'})?.kind,'correct');assert.equal(state.score,1);
+});
+test('hand drops near the visible top rim are accepted without changing wrong-material classification',()=>{
+ const {state,world}=setup();world.dispatch(event('grab-start'));
+ assert.equal(world.dispatch(event('grab-release','a',304,495))?.kind,'correct');assert.equal(state.score,1);
+ const next=setup();next.world.dispatch(event('grab-start'));
+ assert.equal(next.world.dispatch(event('grab-release','a',752,495))?.kind,'incorrect');assert.equal(next.state.score,0);
+});
 test('two hands hold independent objects and both stop falling',()=>{
   const {state,world}=setup();spawn(state,()=>0);state.objects[1].x=600;state.objects[1].y=200;
   world.dispatch(event('grab-start'));world.dispatch(event('grab-start','b',600,200));advance(state,.05,'normal',world.heldIds);

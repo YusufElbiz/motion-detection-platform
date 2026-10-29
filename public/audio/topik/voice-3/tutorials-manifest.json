@@ -1,0 +1,24 @@
+{
+  "engine": "VoxCPM2, patched audio.cpp v0.7.2",
+  "voice": "Topik Sincap variant 3",
+  "selected_variant": 3,
+  "seed": 3637895427,
+  "steps": 16,
+  "cfg": 2.0,
+  "synthetic": true,
+  "filters": "highpass=f=75,lowpass=f=11000,equalizer=f=2800:t=q:w=1:g=1.5,loudnorm=I=-21:TP=-3:LRA=7",
+  "loudness_lufs": -21,
+  "pitch_shift": false,
+  "lines": {
+    "tutorial-mouse": "Merhaba, ben Topik! Atığı fareyle tut, resmine benzeyen kutuya taşı ve bırak. Haydi, doğayı birlikte temizleyelim!",
+    "tutorial-fist": "Merhaba, ben Topik! Açık elinle atığa yaklaş, yumruk yapıp tut. Doğru kutuya taşı, elini açıp bırak. Haydi, doğayı birlikte temizleyelim!",
+    "tutorial-pinch": "Merhaba, ben Topik! Atığa yaklaş, başparmağınla işaret parmağını birleştirip tut. Doğru kutuya taşı, parmaklarını açıp bırak. Haydi başlayalım!",
+    "tutorial-dwell": "Merhaba, ben Topik! Elini atığın üzerinde biraz bekletip tut. Doğru kutuya taşı ve orada biraz bekleyip bırak. Haydi başlayalım!"
+  },
+  "durations_seconds": {
+    "tutorial-mouse": 8.16,
+    "tutorial-fist": 9.76,
+    "tutorial-pinch": 10.08,
+    "tutorial-dwell": 8.96
+  }
+}

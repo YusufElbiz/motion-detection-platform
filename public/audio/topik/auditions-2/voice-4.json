@@ -1,0 +1,17 @@
+{
+  "ad": "topik_masal",
+  "gorunen_ad": "Topik Masal",
+  "cesit": 1,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "A young adult Turkish woman with a soft youthful voice and a warm reassuring smile, gentle preschool storyteller, intimate natural conversational delivery, smooth melodic intonation, calm but cheerful, clear native Turkish diction, clean studio recording, no background noise.",
+  "ses_yaratilirken_okutulan_metin": "Merhaba, ben Topik, ormanın minik sincap arkadaşıyım, seninle oyun oynamayı ve doğayı korumayı çok seviyorum. Haydi birlikte atıkları ayıralım, her birini doğru kutuya bırakalım, ormandaki hayvanlara yardım edelim ve sonunda kocaman bir sevinçle birbirimize teşekkür edelim!",
+  "tasarim_tohumu": 2180055391,
+  "okuma_tohumu": 2180055391,
+  "referans": "referans.wav",
+  "referans_sn": 16.96,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-10-25 18:50"
+}
