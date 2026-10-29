@@ -17,4 +17,9 @@ export function thumbSignature(d:Detection):ThumbSignature|undefined {
  if(offsets.some(x=>!Number.isFinite(x)||Math.abs(x)<.28)||Math.sign(offsets[0])!==Math.sign(offsets[1]))return;
  return {side:offsets[0]>0?1:-1};
 }
+// Anatomical side under the game's assumption that the palm faces the camera
+// (open palm / fist toward the screen). In the unmirrored camera image a right
+// palm has its thumb toward +x, which thumbSignature reports as side +1.
+// A back-of-hand view would invert this, so callers accumulate it as evidence.
+export const thumbAnatomy=(signature:ThumbSignature|undefined)=>signature?signature.side:0;
 export const thumbMatches=(a:ThumbSignature|undefined,b:ThumbSignature|undefined)=>!a||!b||a.side===b.side;

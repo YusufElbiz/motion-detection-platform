@@ -64,11 +64,12 @@ try{
   assert.equal(await page.locator('.ws-pot.selected').count(),1,`round ${round}: pinching a pot picks its colour`);
   await move(640,380,false,true);
   await page.locator('.ws-craft .drop-target').waitFor({timeout:3000});
+  assert.ok((await page.locator('.ws-part-label').textContent()).length>1,'the highlighted part is named before release');
+  if(round===0)await page.screenshot({path:'docs/screenshots/workshop-paint.png'});
   assert.equal(await page.locator('.ws-craft [data-region]').evaluateAll(paths=>paths.filter(p=>p.style.fill).length),0,'carrying paint must not paint yet');
   await open();
   const painted=await page.locator('.ws-craft [data-region]').evaluateAll(paths=>paths.filter(p=>p.style.fill).length);
   assert.equal(painted,1,`round ${round}: opening the pinch paints exactly the part under it (painted ${painted})`);
-  if(round===0)await page.screenshot({path:'docs/screenshots/workshop-paint.png'});
   await move(1110,640,false);await fist(1110,640);await open();
   await page.waitForFunction(()=>['celebrate','gather','gallery'].includes(document.querySelector('#workshop').dataset.phase));
   await page.waitForFunction(()=>document.querySelector('#workshop').dataset.phase!=='celebrate',{},{timeout:8000});

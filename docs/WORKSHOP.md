@@ -17,8 +17,10 @@ açmasını sağlar.
    kutusu çıkar. Boyayı **başparmak ve işaret parmağıyla tut** (yumruk da
    olur), boyamak istediğin parçanın üstüne götür: o parça sarı kenarla
    parlar. Parmaklarını açınca **parçanın tamamı** o renge boyanır. Taşırken
-   hiçbir şey boyanmaz, böylece yanlış yer boyanmaz. Eserler büyük ve 4 iri
-   parçadan oluşur. Topik rengin adını söyler; her elin kendi rengi olabilir.
+   hiçbir şey boyanmaz, böylece yanlış yer boyanmaz. Hedef parçanın adı
+   ("Kafa", "Tekerler"…) üstünde yazar. Boyanmamış parçalar noktalı desenle
+   belli olur. Eserler tanınır çizimlerdir ve 5–6 anlamlı parçadan oluşur.
+   Topik seçilen rengi söyler ("Kırmızı seçtin!"); her elin kendi rengi olabilir.
 4. **Bitti ✓** — Topik eseri över, sıradaki esere geçilir.
 
 Üç eserden sonra **sergi** ekranı açılır: boyanan eserler yan yana görünür;
@@ -34,11 +36,19 @@ seçilir.
 
 ## Ses
 
-Yeni Topik cümleleri için hazır MP3 yoktur; tarayıcıda Türkçe sistem sesi
-varsa onunla okunur, yoksa yalnızca konuşma balonu görünür. Kalıcı ses için
-`src/workshop/scene.ts` içindeki `workshopSpeech` ve `src/workshop/recipes.ts`
-cümleleri mevcut ses üretim betiğiyle `public/audio/topik/voice-3/` altına
-üretilip `src/mascot.ts` içindeki `voiceClips` listesine eklenebilir.
+Topik atölyede de 1. bölümdeki **aynı sesle** konuşur: 29 cümle aynı ses kartı
+ve okuma tohumuyla (VoxCPM2, varyant 3, tohum 3637895427) üretilip
+`public/audio/topik/voice-3/ws-*.mp3` olarak eklendi. Uzun mesajlar (ör.
+karşılama + ilk talimat) kayıtlı cümlelerin art arda çalınmasıyla söylenir.
+Tarayıcının sistem sesi artık hiç kullanılmaz; kaydı olmayan bir cümle
+yalnızca konuşma balonunda görünür.
+
+Cümle değişirse `src/workshop/speech.ts` / `src/workshop/recipes.ts` düzenlenir ve
+yeniden üretilir (yerel motor `.tools/vox` gerekir, git'e girmez):
+
+```powershell
+.tools\vox\.venv\Scripts\python.exe scripts\generate-selected-topik.py --workshop
+```
 
 ## Kod
 
@@ -54,6 +64,23 @@ cümleleri mevcut ses üretim betiğiyle `public/audio/topik/voice-3/` altına
   gerçek yerel model sahte kamerada çalışır, el noktaları test tarafından
   değiştirilir; yalnız el ile üç eser + sergi + menü akışı doğrulanır.
   Gerçek kamerada doğruluk ve çocuk kullanılabilirliği ayrıca denenmelidir.
+
+## Sağ/sol: başparmak yönü (3. tur)
+
+- Her el için bir taraf puanı biriktirilir. Başparmak yönü 2 puan sayılır:
+  avuç kameraya dönükken, aynalanmamış kamera görüntüsünde sağ elin başparmağı
+  +x yönündedir (`thumbAnatomy`).
+- Modelin sol/sağ etiketi 1 puan sayılır, ama ancak oturum içinde başparmakla
+  karşılaştırılıp etiket kuralı öğrenildikten sonra (`labelConvention`).
+  Böylece modelin aynalı ya da aynasız etiket kuralı fark etmez.
+- Kolun hangi kenardan geleceği bu puanla belirlenir. Sağ el atölyedeki
+  sol taraftaki malzemelere uzansa da sağ kol kalır. Puan henüz yetersizse
+  ekran konumu kullanılır.
+- Sınır: tek kamerada sağ avuç içi ile sol el sırtı aynı görünür; ölçüm
+  avucun kameraya dönük olduğunu varsayar (oyunun kullanım biçimi budur).
+  El sırtı uzun süre kameraya dönük kalırsa puan yavaşça yanlış tarafa kayabilir.
+- Üst üste binmede taşıyan el artık etiketle değil konumla bulunur. Model iki
+  ele aynı etiketi verse de, eller oraya kesintisiz geldiyse kimlik korunur.
 
 ## Hareket ve iki el iyileştirmesi (2. tur)
 

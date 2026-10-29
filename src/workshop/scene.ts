@@ -2,30 +2,23 @@ import type {GameInputEvent,Position} from '../input.ts';
 import {attachMouse} from '../input.ts';
 import type {AudioFeedback} from '../audio.ts';
 import type {HandCursor} from '../motion/input.ts';
-import {MascotSpeech,squirrelArt} from '../mascot.ts';
+import {MascotSpeech,squirrelArt,registerVoiceClips} from '../mascot.ts';
 import {wasteDefinition} from '../waste.ts';
 import {WorkshopWorld,workshopLayout,targetIds,type WorkshopEvent,type WorkshopPhase} from './world.ts';
 import {chooseRecipes,paintColors,type Recipe} from './recipes.ts';
+import {workshopSpeech,workshopVoiceLines,colorSpeech} from './speech.ts';
 import './style.css';
 
-export const workshopSpeech={
-  welcome:'Atölyeye hoş geldin! Topladığın atıklarla yeni şeyler yapalım.',
-  another:'Süper! Şimdi diğerini de tezgaha getir.',
-  wrong:'Bu sefer onu kullanmayacağız. Parlayan malzemelerden birini al!',
-  readyHand:'İkisi de tezgahta! Sihirli düğmeye yumruk yap, birleştirelim!',
-  readyMouse:'İkisi de tezgahta! Sihirli düğmeye dokun, birleştirelim!',
-  paintHand:'Boyayı başparmağın ve işaret parmağınla tut. Boyamak istediğin yere götür, parmaklarını aç!',
-  paintMouse:'Boyayı tut, boyamak istediğin yere sürükle ve bırak!',
-  paintDwell:'Bir boyanın üstünde bekle, sonra boyamak istediğin yerde bekle!',
-  needColor:'Önce bir boya kutusu seç!',
-  colorful:'Rengârenk oldu! Bitirince Bitti düğmesine dokun.',
-  gallery:'Bak ne güzel şeyler yaptık! Atıklar çöp değil, yeniden hayat buldu. Teşekkürler, küçük mucit!',
-};
+registerVoiceClips(workshopVoiceLines);
+export {workshopSpeech};
+
 const L=workshopLayout;
 const place=(node:HTMLElement,x:number,y:number)=>{node.style.left=`${x/1280*100}%`;node.style.top=`${y/720*100}%`;};
 const photo=(id:string)=>`<img src="/waste/${id}.png" alt="" draggable="false" decoding="async">`;
 const nameOf=(id:string)=>wasteDefinition(id)?.name??id;
-const craftSvg=(recipe:Recipe,cls:string)=>`<svg class="${cls}" viewBox="0 0 400 320" aria-hidden="true">${recipe.art}</svg>`;
+// Unpainted parts show a soft dot pattern: "this part can be painted".
+const dots='<defs><pattern id="ws-dots" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#fffdf5"/><circle cx="8" cy="8" r="2.2" fill="#ddcfb6"/></pattern></defs>';
+const craftSvg=(recipe:Recipe,cls:string)=>`<svg class="${cls}" viewBox="0 0 400 320" aria-hidden="true">${dots}${recipe.art}</svg>`;
 
 interface Options {audio:AudioFeedback;mode:()=>'mouse'|'hand';onExit:(choice:'replay'|'menu')=>void}
 export class WorkshopScene {
@@ -55,7 +48,7 @@ export class WorkshopScene {
       <aside class="ws-mascot"><div class="mascot-bubble"><b>Topik</b><p id="ws-message" role="status" aria-live="polite"></p></div><div class="ws-squirrel">${squirrelArt('workshop')}</div></aside>
       <div class="ws-gallery"><h2>Küçük mucidin <em>sergisi</em></h2><div class="ws-gallery-row"></div></div>
       <button class="ws-button ws-replay" type="button" data-target="${targetIds.replay}">Yeniden Oyna ↻</button><button class="ws-button ws-menu" type="button" data-target="${targetIds.menu}">Ana Menü ⌂</button>
-      <p class="ws-hint" role="status"></p><div class="ws-mouse-brush" aria-hidden="true"></div>`;
+      <span class="ws-part-label" aria-hidden="true"></span><p class="ws-hint" role="status"></p><div class="ws-mouse-brush" aria-hidden="true"></div>`;
     game.insertBefore(this.root,game.querySelector('#hand-cursors'));
     this.mouseBrush=this.root.querySelector('.ws-mouse-brush')!;
     paintColors.forEach((_,i)=>place(this.root.querySelector<HTMLElement>(`[data-target="${targetIds.pot+i}"]`)!,L.pots[i].x,L.pots[i].y));
@@ -96,7 +89,7 @@ export class WorkshopScene {
       else this.say(this.options.mode()==='hand'?workshopSpeech.readyHand:workshopSpeech.readyMouse);
     }else if(result.kind==='wrong'){audio.play(false);this.say(workshopSpeech.wrong);}
     else if(result.kind==='combine'){audio.play(true);this.root.classList.add('crafting');this.phaseUntil=now+1900;}
-    else if(result.kind==='color'){this.say(paintColors.find(c=>c.value===result.color)?.name+'!',true);}
+    else if(result.kind==='color'){const color=paintColors.find(c=>c.value===result.color);if(color)this.say(colorSpeech(color.id),true);}
     else if(result.kind==='need-color'){if(now-this.needColorAt>4000){this.needColorAt=now;this.say(workshopSpeech.needColor);}this.root.classList.add('need-color');setTimeout(()=>this.root.classList.remove('need-color'),900);}
     else if(result.kind==='painted'){
       const path=this.root.querySelector<SVGPathElement>(`.ws-craft [data-region="${result.region}"]`);
@@ -155,6 +148,11 @@ export class WorkshopScene {
     this.mouseBrush.hidden=!(brush&&world.phase==='paint'&&this.options.mode()==='mouse');if(brush)this.mouseBrush.style.setProperty('--brush',brush);
     this.root.querySelectorAll<HTMLElement>('.ws-slot').forEach((slot,i)=>slot.classList.toggle('filled',world.items.some(item=>item.placed&&item.x===L.slots[i].x)));
     const drops=new Set(world.dropTargets.values());
+    // Name the part the carried paint will land on, just above the hand.
+    const label=this.root.querySelector<HTMLElement>('.ws-part-label')!,carrier=[...world.dropTargets.keys()][0];
+    const point=carrier===undefined?undefined:world.dropPoints.get(carrier);
+    label.hidden=!point;
+    if(point&&carrier!==undefined){label.textContent=world.recipe.regions[world.dropTargets.get(carrier)!];place(label,point.x,Math.max(40,point.y-70));}
     this.root.querySelectorAll<SVGPathElement>('.ws-craft [data-region]').forEach(path=>{const region=Number(path.dataset.region),value=world.paint.get(region)??'';if(path.style.fill!==value)path.style.fill=value;path.classList.toggle('drop-target',drops.has(region));});
     const hint=this.hint(),node=this.root.querySelector('.ws-hint')!;if(node.textContent!==hint)node.textContent=hint;
   }

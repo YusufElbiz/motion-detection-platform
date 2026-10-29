@@ -8,7 +8,7 @@ import type {GameInputEvent,Position} from '../src/input.ts';
 import type {TrackedHand} from '../src/tracking/types.ts';
 
 // The fake craft has its regions in a horizontal strip across the craft area.
-const regionAt=(p:Position)=>p.y>300&&p.y<420&&p.x>440&&p.x<840?Math.min(4,Math.floor((p.x-440)/80)):undefined;
+const regionAt=(p:Position)=>p.y>300&&p.y<420&&p.x>440&&p.x<842?Math.min(5,Math.floor((p.x-440)/67)):undefined;
 const event=(type:GameInputEvent['type'],x:number,y:number,pointerId='a',source:'mouse'|'hand'='hand'):GameInputEvent=>({type,pointerId,source,position:{x,y}});
 function setup(){const world=new WorkshopWorld(regionAt);world.start([recipes[0],recipes[1]],()=>0);return world;}
 const carryTo=(world:WorkshopWorld,id:number,x:number,y:number,pointer='a')=>{
@@ -55,15 +55,15 @@ test('combine, pinch a colour, drop it on parts and finish all crafts into the g
   assert.equal(world.heldBy('a'),undefined);assert.equal(world.dropTargets.size,0);
   // Dropping beside the craft paints nothing.
   world.dispatch(event('grab-start',pots[2].x,pots[2].y));assert.equal(world.dispatch(event('grab-release',640,200)),undefined);
-  const results=[460,620,700,780].map(x=>{world.dispatch(event('grab-start',pots[2].x,pots[2].y));world.dispatch(event('grab-held',x,360));return world.dispatch(event('grab-release',x,360));});
-  assert.deepEqual(results.map(r=>r?.kind),['painted','painted','painted','painted']);
-  assert.equal(results[3]?.kind==='painted'&&results[3].complete,true);
+  const results=[460,620,700,760,820].map(x=>{world.dispatch(event('grab-start',pots[2].x,pots[2].y));world.dispatch(event('grab-held',x,360));return world.dispatch(event('grab-release',x,360));});
+  assert.deepEqual(results.map(r=>r?.kind),['painted','painted','painted','painted','painted']);
+  assert.equal(results[4]?.kind==='painted'&&results[4].complete,true);
   assert.equal(world.dispatch(event('grab-start',done.x,done.y))?.kind,'done');
   world.next(()=>0);assert.equal(world.phase,'gather');assert.equal(world.index,1);assert.equal(world.paint.size,0);
   for(const item of world.items.filter(i=>i.needed))carryTo(world,item.id,640,480);
   world.dispatch(event('grab-start',combine.x,combine.y));world.finishCrafting();
   world.dispatch(event('grab-start',done.x,done.y));world.next();
-  assert.equal(world.phase,'gallery');assert.equal(world.gallery.length,2);assert.equal(world.gallery[0].paint.size,5);
+  assert.equal(world.phase,'gallery');assert.equal(world.gallery.length,2);assert.equal(world.gallery[0].paint.size,6);
   assert.equal(world.dispatch(event('grab-start',workshopLayout.gallery.menu.x,workshopLayout.gallery.menu.y))?.kind,'menu');
 });
 test('two hands carry different items and a lost hand returns its item to the tray',()=>{

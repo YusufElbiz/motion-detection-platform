@@ -35,6 +35,7 @@ export class WorkshopWorld implements MotionWorld {
   readonly hovered=new Map<string,number>();
   // Region the carried paint would land on, highlighted before release.
   readonly dropTargets=new Map<string,number>();
+  readonly dropPoints=new Map<string,Position>();
   // Dwell control cannot "hold" a brush; it paints with single touches.
   brushOnHold=true;
   private carries=new Map<string,Carry>();
@@ -80,7 +81,7 @@ export class WorkshopWorld implements MotionWorld {
   targetBin(point:Position){return this.phase==='gather'&&this.overTable(point)?'table':undefined;}
   overTable(point:Position){const t=workshopLayout.table;return point.x>=t.left-30&&point.x<=t.right+30&&point.y>=t.top-60&&point.y<=t.bottom+30;}
   cancel(pointerId:string){
-    const carry=this.carries.get(pointerId);this.carries.delete(pointerId);this.hovered.delete(pointerId);this.dropTargets.delete(pointerId);
+    const carry=this.carries.get(pointerId);this.carries.delete(pointerId);this.hovered.delete(pointerId);this.dropTargets.delete(pointerId);this.dropPoints.delete(pointerId);
     const item=this.items.find(i=>i.id===carry?.target);if(item&&!item.placed){item.x=item.home.x;item.y=item.home.y;}
   }
   cancelAll(){for(const id of [...this.carries.keys()])this.cancel(id);this.hovered.clear();}
@@ -106,9 +107,9 @@ export class WorkshopWorld implements MotionWorld {
     }
     if(!carry)return;
     if(carry.target===BRUSH){
-      if(event.type==='grab-held'){const region=this.regionAt(point);if(region===undefined)this.dropTargets.delete(id);else this.dropTargets.set(id,region);return;}
+      if(event.type==='grab-held'){const region=this.regionAt(point);this.dropPoints.set(id,point);if(region===undefined)this.dropTargets.delete(id);else this.dropTargets.set(id,region);return;}
       // Opening the fingers drops the paint: the whole part under it is filled.
-      if(event.type==='grab-release'){this.carries.delete(id);this.dropTargets.delete(id);return this.fill(id,point);}
+      if(event.type==='grab-release'){this.carries.delete(id);this.dropTargets.delete(id);this.dropPoints.delete(id);return this.fill(id,point);}
       return;
     }
     const item=this.items.find(i=>i.id===carry.target);

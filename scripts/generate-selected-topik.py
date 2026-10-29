@@ -18,8 +18,13 @@ settings=ayarlar.load(ROOT/'.tools/vox/ayarlar.json')
 card_path=ROOT/'.tools/vox/sesler/topik_sincap/cesit_03/ses.json'
 card=json.loads(card_path.read_text(encoding='utf-8'))
 assert card['okuma_tohumu']==3637895427 and card['cesit']==3
-parser=argparse.ArgumentParser();parser.add_argument('--tutorials',action='store_true');args=parser.parse_args()
-if args.tutorials:
+parser=argparse.ArgumentParser();parser.add_argument('--tutorials',action='store_true');parser.add_argument('--workshop',action='store_true');args=parser.parse_args()
+if args.workshop:
+    # Workshop lines live in TypeScript; Node prints them as JSON.
+    code="import('./src/workshop/speech.ts').then(m=>process.stdout.write(JSON.stringify(m.workshopVoiceLines)))"
+    lines=json.loads(subprocess.run(['node','--experimental-strip-types','--no-warnings','-e',code],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',check=True).stdout)
+    assert lines and all(name.startswith('ws-') for name in lines)
+elif args.tutorials:
     source=(ROOT/'src/mascot.ts').read_text(encoding='utf-8')
     block=re.search(r'export const tutorialMessages=\{(.*?)\};',source,re.S).group(1)
     lines={f'tutorial-{mode}':text for mode,text in re.findall(r"(mouse|fist|pinch|dwell):'([^']+)'",block)}
@@ -45,7 +50,7 @@ for name,text in lines.items():
     for index,sentence in enumerate(re.split(r'(?<=[.!?])\s+',text.strip()),1):
         request_id=f'{name}-{index}';groups[name].append(request_id)
         requests.append(motor.read_request(request_id,sentence,card['okuma_tohumu'],reference,card['ses_yaratilirken_okutulan_metin']))
-work=ROOT/'.tools/topik-output'/('tutorials-3' if args.tutorials else 'selected-3')
+work=ROOT/'.tools/topik-output'/('workshop-3' if args.workshop else 'tutorials-3' if args.tutorials else 'selected-3')
 def progress(done,total,elapsed):
     if int(elapsed)%15<3:print(f'{done}/{total} sentences, {elapsed:.0f}s',flush=True)
 print(f'Generating {len(requests)} sentences with fixed voice 3 / seed {card["okuma_tohumu"]}',flush=True)
@@ -59,7 +64,7 @@ for name,ids in groups.items():
     subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',str(wav),'-af',filters,'-codec:a','libmp3lame','-b:a','128k',str(folder/f'{name}.mp3')],check=True)
     print(f'{name}: {len(waveform)/48000:.2f}s',flush=True)
 manifest={'engine':'VoxCPM2, patched audio.cpp v0.7.2','voice':'Topik Sincap variant 3','selected_variant':3,'seed':card['okuma_tohumu'],'steps':16,'cfg':2.0,'synthetic':True,'filters':filters,'loudness_lufs':-21,'pitch_shift':False,'lines':lines,'durations_seconds':{name:round(sum(len(result['audios'][i])/48000 for i in ids)+max(0,len(ids)-1)*.16,3) for name,ids in groups.items()}}
-(folder/('tutorials-manifest.json' if args.tutorials else 'manifest.json')).write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+(folder/('workshop-manifest.json' if args.workshop else 'tutorials-manifest.json' if args.tutorials else 'manifest.json')).write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 for link in aliases.iterdir():
     assert link.parent==aliases and link.is_file();link.unlink()
 aliases.rmdir()
