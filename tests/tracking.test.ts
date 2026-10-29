@@ -139,3 +139,37 @@ test('frame gate schedules approximately 24 from 30 FPS without duplicate infere
   gate.reset();assert.deepEqual(gate.accept(0,0,24,true),{fresh:true,due:false});
   assert.equal(gate.accept(1/30,1000/30,24,false).due,true);
 });
+
+test('both labels swapping while two separated hands close into fists keeps identities and sides',()=>{
+  const p=new TrackingProcessor();p.predictive=true;
+  const initial=p.update([detection(.3,'Right'),detection(.7,'Left')],0);
+  for(let i=1;i<=6;i++){
+    // The model swaps both labels on alternating frames; the hands barely move.
+    const swap=i%2===1;
+    const frame=p.update([detection(.3+i*.005,swap?'Left':'Right'),detection(.7-i*.005,swap?'Right':'Left')],i*40);
+    assert.equal(frame.ambiguous,false);
+    assert.equal(frame.hands[0].id,initial.hands[0].id);assert.equal(frame.hands[1].id,initial.hands[1].id);
+    assert.equal(frame.hands[0].colorSlot,initial.hands[0].colorSlot);assert.equal(frame.hands[0].handedness,'Right');
+  }
+});
+
+test('a new second hand cannot take the label of the continuing hand',()=>{
+  const p=new TrackingProcessor();p.predictive=true;
+  const first=p.update([detection(.7,'Left')],0).hands[0];
+  const frame=p.update([detection(.71,'Left'),detection(.25,'Left')],40);
+  assert.equal(frame.hands[0].id,first.id);assert.equal(frame.hands[1].handedness,'Right');
+  assert.notEqual(frame.hands[0].colorSlot,frame.hands[1].colorSlot);
+});
+
+test('label convention is learned from uncrossed hands so arms come from the matching screen side',()=>{
+  const p=new TrackingProcessor();p.predictive=true;
+  // Mirrored convention: the Left-labelled hand appears at small raw x (screen right).
+  let frame=p.update([detection(.25,'Left'),detection(.75,'Right')],0);
+  for(let i=1;i<30;i++)frame=p.update([detection(.25,'Left'),detection(.75,'Right')],i*40);
+  assert.equal(p.mirroredLabels,true);
+  // Raw x .25 is mirrored to screen x .75: that hand's arm must use the right anchor (slot 1).
+  assert.equal(frame.hands.find(h=>h.handedness==='Left')!.colorSlot,1);
+  const q=new TrackingProcessor();q.predictive=true;
+  for(let i=0;i<30;i++)q.update([detection(.75,'Left'),detection(.25,'Right')],i*40);
+  assert.equal(q.mirroredLabels,false);
+});

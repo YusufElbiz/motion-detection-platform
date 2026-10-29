@@ -26,6 +26,7 @@ export class CartoonArms {
         front.innerHTML=`<svg viewBox="-70 -80 140 160" aria-hidden="true"><g class="front-art"><g class="grip-art"><path d="M-31 19 Q-42 13 -37 4 Q-33 1 -28 7 L-17 19 Q-11 27 -18 29 Q-26 29 -31 19Z" fill="${skin}" stroke="#8e654c" stroke-width="2"/><path d="M29 16 Q36 8 40 13 Q43 20 34 27 L18 31 Q12 30 16 23Z" fill="${skin}" stroke="#8e654c" stroke-width="2"/><path d="M-17 28 Q0 36 18 29" fill="none" stroke="#8e654c" stroke-width="2"/></g><circle class="hand-dwell-ring" cx="0" cy="0" r="45" fill="none" stroke="${color}" stroke-width="4" transform="rotate(-90)"/></g></svg>`;
         this.front.append(front);node={back,front,closed:0,angle:cursor.angle,last:now,slot:cursor.colorSlot};this.nodes.set(cursor.id,node);
       }
+      node.slot=cursor.colorSlot;
       const delta=Math.max(1,Math.min(50,now-node.last));node.last=now;
       const target=cursor.gesture==='CLOSED'?1:cursor.gesture==='CLOSING'?.65:cursor.gesture==='OPENING'?.25:cursor.gesture==='OPEN'?0:node.closed;
       node.closed+=(target-node.closed)*Math.min(1,delta/Math.max(10,armConfig.animationMs/2.5));

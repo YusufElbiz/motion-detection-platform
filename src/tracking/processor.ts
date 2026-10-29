@@ -11,6 +11,10 @@ export class TrackingProcessor {
   private nextId=1;
   private lastTimestamp=-1;
   private overlapSide?:string;
+  // +1 when the model's Left label sits on the camera image's right (true
+  // anatomical labels for an unmirrored selfie view), -1 for the opposite.
+  private conventionVotes=0;
+  mirroredLabels?:boolean;
   smoothing=true;
   timeConstantMs=trackingConfig.smoothingTimeConstantMs;
   lossTimeoutMs=trackingConfig.lossTimeoutMs;
@@ -18,7 +22,7 @@ export class TrackingProcessor {
   predictive=false;
   stationaryMs=55;
   fastMs=8;
-  reset() {this.history=[]; this.nextId=1; this.lastTimestamp=-1;this.overlapSide=undefined;}
+  reset() {this.history=[]; this.nextId=1; this.lastTimestamp=-1;this.overlapSide=undefined;this.conventionVotes=0;this.mirroredLabels=undefined;}
   update(detections: Detection[], timestamp: number): TrackingFrame {
     if(timestamp<this.lastTimestamp) this.reset();
     this.lastTimestamp=timestamp;
@@ -42,9 +46,26 @@ export class TrackingProcessor {
       const corroborated=old&&(thumbMatches(thumb,old.thumb)||(this.history.length===1&&d.handedness===old.handedness));
       return unique&&corroborated&&!this.overlapSide?{...d,handedness:old.handedness}:d;
     });
+    // Spatial continuity outranks the per-frame label: the model often swaps
+    // Left/Right while a small hand closes into a fist and the thumb hides.
+    // After an overlap the model label is trusted again (see HAND_IDENTITY.md).
+    let continuous=false;
+    if(this.history.length&&valid.length&&!this.overlapSide){
+      const {matches,ambiguous}=associateTemporal(this.history,valid.map(d=>palmCenter(d.landmarks)),timestamp);
+      // A visible thumb is anatomical evidence; when it contradicts the spatial
+      // match the thumb/ambiguity handling below decides instead.
+      if(!ambiguous&&matches.size&&[...matches].every(([i,track])=>thumbMatches(thumbSignature(valid[i]),track.thumb))){
+        continuous=true;
+        valid=valid.map((d,i)=>{const track=matches.get(i);return track?{...d,handedness:track.handedness}:d;});
+        // A newly appearing hand cannot claim the side a continuing hand keeps.
+        if(valid.length===2&&matches.size===1&&valid[0].handedness===valid[1].handedness){
+          const fresh=matches.has(0)?1:0;valid[fresh]={...valid[fresh],handedness:valid[fresh].handedness==='Left'?'Right':'Left'};
+        }
+      }
+    }
     // A visible thumb contradicting a proposed two-hand reassignment must not
     // silently move an owned object to the other hand. Await observable evidence.
-    if(this.history.length===2&&valid.some(d=>{
+    if(!continuous&&this.history.length===2&&valid.some(d=>{
       const old=this.history.find(h=>h.handedness===d.handedness);
       return old&&!thumbMatches(thumbSignature(d),old.thumb);
     }))return {timestamp,hands:[],ambiguous:true};
@@ -63,6 +84,7 @@ export class TrackingProcessor {
       }else this.overlapSide=undefined;
     }
     const centers=valid.map(d=>palmCenter(d.landmarks));
+    if(!suppressed)this.voteConvention(valid,centers);
     const anatomical=new Map<number,History>();
     const assigned=new Set<number>();
     valid.forEach((d,i)=>{
@@ -97,12 +119,25 @@ export class TrackingProcessor {
     for(const candidate of candidates) if(candidate.distance<trackingConfig.matchDistance && !matches.has(candidate.index) && !used.has(candidate.history.id)) {matches.set(candidate.index,candidate.history);used.add(candidate.history.id);}
     return this.build(valid,centers,timestamp,matches,ambiguous);
   }
+  // Uncrossed, well separated hands show which labelling convention the model
+  // uses. Decide once per session so a child crossing arms later cannot flip it.
+  private voteConvention(valid:Detection[],centers:Point[]){
+    if(this.mirroredLabels!==undefined||valid.length!==2)return;
+    const left=valid.findIndex(d=>d.handedness==='Left'),right=valid.findIndex(d=>d.handedness==='Right');
+    if(left<0||right<0||Math.abs(centers[left].x-centers[right].x)<.25)return;
+    this.conventionVotes+=centers[left].x>centers[right].x?1:-1;
+    if(Math.abs(this.conventionVotes)<24)return;
+    this.mirroredLabels=this.conventionVotes<0;
+    // Arms of hands already tracked must come from the matching screen side.
+    if(this.mirroredLabels)for(const h of this.history)h.colorSlot=h.colorSlot===0?1:0;
+  }
   private build(valid:Detection[],centers:Point[],timestamp:number,matches:Map<number,History>,ambiguous:boolean):TrackingFrame {
     const used=new Set([...matches.values()].map(h=>h.id));
     const reserved=new Set([...matches.values()].map(h=>h.colorSlot));
     const hands: TrackedHand[]=valid.map((d,index)=>{
       const old=matches.get(index);
-      const preferred=d.handedness==='Left'?0:d.handedness==='Right'?1:undefined;
+      const side=this.mirroredLabels?(d.handedness==='Left'?'Right':d.handedness==='Right'?'Left':d.handedness):d.handedness;
+      const preferred=side==='Left'?0:side==='Right'?1:undefined;
       const slot=old?.colorSlot ?? (preferred!==undefined&&!reserved.has(preferred)?preferred:([0,1].find(value=>!reserved.has(value)) ?? index));
       reserved.add(slot);
       const raw=d.landmarks.map(p=>({...p}));

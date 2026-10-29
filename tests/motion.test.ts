@@ -26,7 +26,7 @@ function driver(method:'dwell'|'pinch'='dwell'){
 }
 test('collision boundaries include forgiving hand radius and nearest padded bin',()=>{
   const object={id:1,category:'plastic' as const,x:200,y:200};
-  assert.equal(objectContains(object,{x:282,y:200},'hand'),true);assert.equal(objectContains(object,{x:282.1,y:200},'hand'),false);
+  assert.equal(objectContains(object,{x:300,y:200},'hand'),true);assert.equal(objectContains(object,{x:300.1,y:200},'hand'),false);
   assert.equal(binAt({x:304,y:520}), 'plastic');assert.equal(binAt({x:304,y:505},14),undefined);assert.equal(binAt({x:304,y:506},14),'plastic');
   assert.equal(binAt({x:416,y:590},18),'plastic');assert.equal(binAt({x:417,y:590},18),'paper');
 });

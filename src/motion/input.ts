@@ -56,7 +56,7 @@ export class MotionInput {
       for(const context of this.contexts.values()){if(this.settings.method!=='fist')this.emit(context,'input-disabled');this.lose(context,now);}
       this.tick(now);return;
     }
-    const seen=new Set<string>();
+    const seen=new Set<string>(),present=new Set(frame.hands.map(hand=>`hand-${hand.id}`));
     for(const hand of frame.hands.slice(0,2)){
       const id=`hand-${hand.id}`;seen.add(id);
       const anchor=this.settings.method==='fist'?hand.palmCenter:hand.indexTip;
@@ -67,8 +67,10 @@ export class MotionInput {
       const ratio=this.settings.method==='pinch'?pinchRatio(hand.raw,this.aspect):undefined;
       const geometry:PoseMeasurement=this.settings.method==='fist'?{pose:'UNKNOWN',score:0,source:'heuristic',fingers:[]}:landmarkPose(hand.raw,this.aspect,this.thresholds);
       // Same color slot with a new track ID cannot inherit the previous carry.
-      for(const old of this.contexts.values())if(old.id!==id&&old.colorSlot===hand.colorSlot){this.emit(old,'input-disabled');this.contexts.delete(old.id);}
+      // A different hand still visible in this frame is not an inheritance.
+      for(const old of this.contexts.values())if(old.id!==id&&!present.has(old.id)&&old.colorSlot===hand.colorSlot){this.emit(old,'input-disabled');this.contexts.delete(old.id);}
       let context=this.contexts.get(id);
+      if(context)context.colorSlot=hand.colorSlot;
       if(!context){context={id,colorSlot:hand.colorSlot,position,state:'IDLE',progress:0,lastSeen:now,readyAt:now,cooldownUntil:0,pinch:new PinchRecognizer(),dwell:new DwellTimer(),fist:new FistRecognizer(),measurement:geometry,rawPalm:palmCenter(hand.raw),smoothPalm:hand.palmCenter,rawMapped:position,angle:0};this.contexts.set(id,context);}
       if(this.settings.method==='fist'){
         // Use the SAME 3D decision as the accepted laboratory. Keep the game
