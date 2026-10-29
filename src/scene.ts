@@ -247,6 +247,7 @@ export function mountGameScene(){
       // retained separately for frame identity and measured pipeline age; mixing
       // them caused fresh but delayed results to be treated as missing hands.
       motion.update(frame,performance.now());
+      session.processor.priority=new Set(motion.carryingHandIds);
     }
   };
   session.onStatus=(status,message)=>{

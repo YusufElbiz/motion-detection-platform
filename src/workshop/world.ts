@@ -8,7 +8,7 @@ export const workshopLayout={
   table:{left:400,right:880,top:380,bottom:610},slots:[{x:560,y:478},{x:720,y:478}],
   combine:{x:640,y:250,r:95},
   pots:paintColors.map((_,i)=>({x:i%2?192:88,y:225+Math.floor(i/2)*130,r:48})),
-  done:{x:1060,y:610,w:260,h:90},
+  done:{x:1110,y:640,w:230,h:90},
   gallery:{replay:{x:390,y:625,w:300,h:90},menu:{x:710,y:625,w:300,h:90}},
 };
 export const targetIds={pot:100,region:200,combine:300,done:301,replay:400,menu:401} as const;
@@ -33,12 +33,16 @@ export class WorkshopWorld implements MotionWorld {
   gallery:{recipe:Recipe;paint:Map<number,string>}[]=[];
   readonly brushes=new Map<string,string>();
   readonly hovered=new Map<string,number>();
+  // Region the carried paint would land on, highlighted before release.
+  readonly dropTargets=new Map<string,number>();
   // Dwell control cannot "hold" a brush; it paints with single touches.
   brushOnHold=true;
   private carries=new Map<string,Carry>();
   private regionAt:(point:Position)=>number|undefined;
   constructor(regionAt:(point:Position)=>number|undefined){this.regionAt=regionAt;}
   get recipe(){return this.recipes[this.index];}
+  // Paint is picked up with a thumb + index pinch (a fist works too).
+  get pinchGrab(){return this.phase==='paint'&&this.brushOnHold;}
   get heldIds(){return new Set([...this.carries.values()].map(c=>c.target).filter(id=>id!==BRUSH));}
   start(recipes:Recipe[],random:()=>number=Math.random){
     this.recipes=recipes;this.index=0;this.gallery=[];this.brushes.clear();this.load(random);
@@ -76,7 +80,7 @@ export class WorkshopWorld implements MotionWorld {
   targetBin(point:Position){return this.phase==='gather'&&this.overTable(point)?'table':undefined;}
   overTable(point:Position){const t=workshopLayout.table;return point.x>=t.left-30&&point.x<=t.right+30&&point.y>=t.top-60&&point.y<=t.bottom+30;}
   cancel(pointerId:string){
-    const carry=this.carries.get(pointerId);this.carries.delete(pointerId);this.hovered.delete(pointerId);
+    const carry=this.carries.get(pointerId);this.carries.delete(pointerId);this.hovered.delete(pointerId);this.dropTargets.delete(pointerId);
     const item=this.items.find(i=>i.id===carry?.target);if(item&&!item.placed){item.x=item.home.x;item.y=item.home.y;}
   }
   cancelAll(){for(const id of [...this.carries.keys()])this.cancel(id);this.hovered.clear();}
@@ -102,8 +106,9 @@ export class WorkshopWorld implements MotionWorld {
     }
     if(!carry)return;
     if(carry.target===BRUSH){
-      if(event.type==='grab-held')return this.brush(id,point,false);
-      if(event.type==='grab-release'){this.carries.delete(id);return;}
+      if(event.type==='grab-held'){const region=this.regionAt(point);if(region===undefined)this.dropTargets.delete(id);else this.dropTargets.set(id,region);return;}
+      // Opening the fingers drops the paint: the whole part under it is filled.
+      if(event.type==='grab-release'){this.carries.delete(id);this.dropTargets.delete(id);return this.fill(id,point);}
       return;
     }
     const item=this.items.find(i=>i.id===carry.target);
@@ -135,21 +140,15 @@ export class WorkshopWorld implements MotionWorld {
     const holdBrush=this.brushOnHold||source==='mouse';
     if(target>=targetIds.pot&&target<targetIds.pot+paintColors.length){
       const color=paintColors[target-targetIds.pot].value;this.brushes.set(id,color);
-      // The same fist can go on to paint without opening first.
+      // Pinched paint travels with the hand until the fingers open.
       if(holdBrush)this.carries.set(id,{target:BRUSH,offset:{x:0,y:0}});
       return {kind:'color',color,pointerId:id};
     }
-    if(target>=targetIds.region){
-      if(!this.brushes.has(id))return {kind:'need-color'};
-      if(holdBrush)this.carries.set(id,{target:BRUSH,offset:{x:0,y:0}});
-      return this.brush(id,point,true);
-    }
+    // Touching a part with a colour already chosen fills it straight away.
+    if(target>=targetIds.region)return this.brushes.has(id)?this.fill(id,point):{kind:'need-color'};
   }
-  private brush(id:string,point:Position,first:boolean):WorkshopEvent|undefined {
+  private fill(id:string,point:Position):WorkshopEvent|undefined {
     const color=this.brushes.get(id);if(!color||this.phase!=='paint')return;
-    // Sliding a loaded brush over another pot picks up that colour instead.
-    const pot=workshopLayout.pots.findIndex(p=>inCircle(point,p));
-    if(!first&&pot>=0){const next=paintColors[pot].value;if(next!==color){this.brushes.set(id,next);return {kind:'color',color:next,pointerId:id};}return;}
     const region=this.regionAt(point);
     if(region===undefined||this.paint.get(region)===color)return;
     this.paint.set(region,color);

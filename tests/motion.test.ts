@@ -99,10 +99,17 @@ test('pinch integrates intentional grab, hysteresis carry and one release',()=>{
   for(const [x,y]of [[220,300],[250,420],[280,510],[304,590]])d.hold(x,y,2,true);
   d.hold(304,590,6,false);assert.equal(d.state.score,1);d.hold(304,590,10,false);assert.equal(d.state.score,1);
 });
-test('tracking loss freezes then cancels without a score, including while above a bin',()=>{
+test('tracking loss freezes then cancels without a score away from bins',()=>{
+  const d=driver();d.hold(200,200);for(const [x,y]of [[240,300],[280,380]])d.hold(x,y,1);
+  d.step([]);assert.equal(d.motion.cursors[0].state,'TRACKING_LOST');assert.equal(d.world.heldIds.size,1);
+  d.motion.tick(d.time()+200);assert.equal(d.world.heldIds.size,1);
+  d.motion.tick(d.time()+800);assert.equal(d.world.heldIds.size,0);assert.equal(d.state.score,0);
+});
+test('a carrying hand lost over a bin (hidden behind the other hand) drops the object into it',()=>{
   const d=driver();d.hold(200,200);for(const [x,y]of [[240,330],[280,460],[304,590]])d.hold(x,y,1);
-  d.step([]);assert.equal(d.motion.cursors[0].state,'TRACKING_LOST');assert.equal(d.world.heldIds.size,1);assert.equal(d.state.score,0);
-  d.motion.tick(d.time()+800);assert.equal(d.world.heldIds.size,0);assert.equal(d.state.score,0);assert.equal(d.state.objects[0].y,476);
+  d.step([]);assert.equal(d.world.heldIds.size,1);assert.equal(d.state.score,0);
+  d.motion.tick(d.time()+150);assert.equal(d.world.heldIds.size,1,'a short blip keeps the carry');
+  d.motion.tick(d.time()+300);assert.equal(d.world.heldIds.size,0);assert.equal(d.state.score,1);
 });
 test('short loss recovery requires stability and restarts dwell release evidence',()=>{
   const d=driver();d.hold(200,200);d.step([]);d.hold(200,200,5);assert.equal(d.world.heldIds.size,1);assert.equal(d.motion.cursors[0].state,'CARRYING');assert.equal(d.state.score,0);

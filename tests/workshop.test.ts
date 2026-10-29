@@ -38,7 +38,7 @@ test('needed items snap onto the table, a distractor and off-table drops return 
   assert.equal(world.objectAt({x:needed[0].x,y:needed[0].y}),undefined);
   assert.equal(carryTo(world,needed[1].id,700,500)?.kind,'placed');assert.equal(world.phase,'combine');
 });
-test('combine, pick colour, paint by sliding the closed fist and finish all crafts into the gallery',()=>{
+test('combine, pinch a colour, drop it on parts and finish all crafts into the gallery',()=>{
   const world=setup();
   for(const item of world.items.filter(i=>i.needed))carryTo(world,item.id,640,480);
   const {combine,pots,done}=workshopLayout;
@@ -47,12 +47,17 @@ test('combine, pick colour, paint by sliding the closed fist and finish all craf
   assert.equal(world.dispatch(event('grab-start',460,360))?.kind,'need-color');
   const picked=world.dispatch(event('grab-start',pots[2].x,pots[2].y));
   assert.equal(picked?.kind==='color'&&picked.color,paintColors[2].value);
-  assert.equal(world.heldBy('a'),999);
-  const results=[460,540,620,700,780].map(x=>world.dispatch(event('grab-held',x,360)));
-  assert.deepEqual(results.map(r=>r?.kind),['painted','painted','painted','painted','painted']);
-  assert.equal(results[4]?.kind==='painted'&&results[4].complete,true);
-  assert.equal(world.dispatch(event('grab-held',780,360)),undefined); // same colour twice is a no-op
-  world.dispatch(event('grab-release',780,360));assert.equal(world.heldBy('a'),undefined);
+  assert.equal(world.heldBy('a'),999);assert.equal(world.pinchGrab,true);
+  // Carrying over parts only highlights; nothing is painted until release.
+  assert.equal(world.dispatch(event('grab-held',460,360)),undefined);assert.equal(world.dropTargets.get('a'),0);
+  assert.equal(world.dispatch(event('grab-held',540,360)),undefined);assert.equal(world.paint.size,0);
+  assert.equal(world.dispatch(event('grab-release',540,360))?.kind,'painted');assert.deepEqual([...world.paint.keys()],[1]);
+  assert.equal(world.heldBy('a'),undefined);assert.equal(world.dropTargets.size,0);
+  // Dropping beside the craft paints nothing.
+  world.dispatch(event('grab-start',pots[2].x,pots[2].y));assert.equal(world.dispatch(event('grab-release',640,200)),undefined);
+  const results=[460,620,700,780].map(x=>{world.dispatch(event('grab-start',pots[2].x,pots[2].y));world.dispatch(event('grab-held',x,360));return world.dispatch(event('grab-release',x,360));});
+  assert.deepEqual(results.map(r=>r?.kind),['painted','painted','painted','painted']);
+  assert.equal(results[3]?.kind==='painted'&&results[3].complete,true);
   assert.equal(world.dispatch(event('grab-start',done.x,done.y))?.kind,'done');
   world.next(()=>0);assert.equal(world.phase,'gather');assert.equal(world.index,1);assert.equal(world.paint.size,0);
   for(const item of world.items.filter(i=>i.needed))carryTo(world,item.id,640,480);
@@ -93,4 +98,20 @@ test('the same MotionInput drives the workshop after switching worlds',()=>{
   for(let k=1;k<=8;k++)hold(target.x+(640-target.x)*k/8,target.y+(480-target.y)*k/8,1);
   hold(640,480,8);assert.deepEqual(kinds,['picked','placed']);
   motion.useWorld(world);assert.equal(world.heldBy('hand-1'),undefined);
+});
+
+test('in the paint step a thumb + index pinch picks paint up and opening drops it on a part',()=>{
+  const world=setup();const kinds:string[]=[];
+  for(const item of world.items.filter(i=>i.needed))carryTo(world,item.id,640,480);
+  world.dispatch(event('grab-start',workshopLayout.combine.x,workshopLayout.combine.y));world.finishCrafting();
+  const motion=new MotionInput(world,e=>{const r=world.dispatch(e);if(r)kinds.push(r.kind);});motion.settings.smoothCutoff=0;motion.enable();
+  let now=0;const pot=workshopLayout.pots[1];
+  // In this fixture a "closed" thumb touches the index tip: a pinch, not a fist.
+  const frames=(x:number,y:number,pinch:boolean,count:number)=>{for(let i=0;i<count;i++){now+=50;motion.update({timestamp:now,hands:[hand(x,y,pinch)],ambiguous:false});}};
+  frames(pot.x,pot.y,false,6);frames(pot.x,pot.y,true,6);
+  assert.equal(world.heldBy('hand-1'),999);assert.deepEqual(kinds,['color']);
+  for(let k=1;k<=6;k++)frames(pot.x+(620-pot.x)*k/6,pot.y+(360-pot.y)*k/6,true,1);
+  frames(620,360,true,3);assert.equal(world.paint.size,0);assert.equal(world.dropTargets.get('hand-1'),2);
+  frames(620,360,false,6);
+  assert.deepEqual(kinds,['color','painted']);assert.equal(world.paint.get(2),paintColors[1].value);
 });

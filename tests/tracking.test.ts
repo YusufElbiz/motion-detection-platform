@@ -14,10 +14,10 @@ const detection=(x:number,handedness='Left'):Detection=>({landmarks:Array.from({
 test('anatomical side persists across screen center, reversed result order and brief model errors',()=>{
   const p=new TrackingProcessor();p.predictive=true;
   const first=p.update([detection(.8,'Right')],0).hands[0];
-  assert.equal(first.colorSlot,1);
+  assert.equal(first.colorSlot,0,'raw x .8 is the screen-left half: left arm');
   for(let i=1;i<=7;i++){
     const hand=p.update([detection(.8-i*.09,i===4?'Left':'Right')],i*33).hands[0];
-    assert.equal(hand.id,first.id);assert.equal(hand.handedness,'Right');assert.equal(hand.colorSlot,1);
+    assert.equal(hand.id,first.id);assert.equal(hand.handedness,'Right');assert.equal(hand.colorSlot,0);
   }
   const other=p.update([detection(.2,'Right'),detection(.8,'Left')],280);
   assert.equal(other.hands[0].id,first.id);assert.equal(other.hands[1].colorSlot,0);
@@ -161,15 +161,24 @@ test('a new second hand cannot take the label of the continuing hand',()=>{
   assert.notEqual(frame.hands[0].colorSlot,frame.hands[1].colorSlot);
 });
 
-test('label convention is learned from uncrossed hands so arms come from the matching screen side',()=>{
+test('arm slots follow the screen side, whatever the model labels say',()=>{
   const p=new TrackingProcessor();p.predictive=true;
-  // Mirrored convention: the Left-labelled hand appears at small raw x (screen right).
+  // Labels opposite to anatomy: the arm side must still match the screen.
   let frame=p.update([detection(.25,'Left'),detection(.75,'Right')],0);
-  for(let i=1;i<30;i++)frame=p.update([detection(.25,'Left'),detection(.75,'Right')],i*40);
-  assert.equal(p.mirroredLabels,true);
-  // Raw x .25 is mirrored to screen x .75: that hand's arm must use the right anchor (slot 1).
-  assert.equal(frame.hands.find(h=>h.handedness==='Left')!.colorSlot,1);
-  const q=new TrackingProcessor();q.predictive=true;
-  for(let i=0;i<30;i++)q.update([detection(.75,'Left'),detection(.25,'Right')],i*40);
-  assert.equal(q.mirroredLabels,false);
+  assert.equal(frame.hands.find(h=>h.raw[0].x===.75)!.colorSlot,0);assert.equal(frame.hands.find(h=>h.raw[0].x===.25)!.colorSlot,1);
+  // Hands swap sides gradually (crossing): once clearly apart, arms swap too.
+  for(let i=1;i<=10;i++)frame=p.update([detection(.25+i*.05,'Left'),detection(.75-i*.05,'Right')],i*40);
+  const left=frame.hands.find(h=>h.raw[0].x>.5)!,right=frame.hands.find(h=>h.raw[0].x<.5)!;
+  assert.equal(left.colorSlot,0);assert.equal(right.colorSlot,1);assert.notEqual(left.id,right.id);
+});
+test('overlap keeps the hand that carries an object even when its palm looks smaller',()=>{
+  const p=new TrackingProcessor();p.predictive=true;
+  const palm=(x:number,side:string,size:number)=>{
+    const d=detection(x,side);d.landmarks[5]={x:x-size,y:.5,z:0};d.landmarks[17]={x:x+size,y:.5,z:0};
+    d.landmarks[0]={x,y:.5+size,z:0};d.landmarks[9]={x,y:.5-size,z:0};return d;
+  };
+  const initial=p.update([palm(.3,'Left',.05),palm(.7,'Right',.08)],0);
+  p.priority=new Set([initial.hands[0].id]);
+  const overlap=p.update([palm(.49,'Left',.05),palm(.51,'Right',.08)],40);
+  assert.equal(overlap.hands.length,1);assert.equal(overlap.hands[0].id,initial.hands[0].id);
 });

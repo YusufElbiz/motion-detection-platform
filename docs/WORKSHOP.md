@@ -14,10 +14,11 @@ açmasını sağlar.
 2. **Birleştir** — İki malzeme tezgaha gelince büyük sihirli düğme çıkar.
    Üzerinde yumruk yapmak yeterlidir; yıldızlarla yeni eser belirir.
 3. **Boya (isteğe bağlı)** — "İstersen boyayabiliriz" der; solda altı boya
-   kutusu çıkar. Boya kutusunda yumruk yap, yumruğu açmadan resmin üstünde
-   gezdir. Kolun ucundaki renkli nokta seçili rengi gösterir; Topik rengin
-   adını söyler. Her elin kendi rengi olabilir. Kapalı yumrukla başka bir boya
-   kutusunun üstünden geçmek rengi değiştirir.
+   kutusu çıkar. Boyayı **başparmak ve işaret parmağıyla tut** (yumruk da
+   olur), boyamak istediğin parçanın üstüne götür: o parça sarı kenarla
+   parlar. Parmaklarını açınca **parçanın tamamı** o renge boyanır. Taşırken
+   hiçbir şey boyanmaz, böylece yanlış yer boyanmaz. Eserler büyük ve 4 iri
+   parçadan oluşur. Topik rengin adını söyler; her elin kendi rengi olabilir.
 4. **Bitti ✓** — Topik eseri över, sıradaki esere geçilir.
 
 Üç eserden sonra **sergi** ekranı açılır: boyanan eserler yan yana görünür;
@@ -54,7 +55,19 @@ cümleleri mevcut ses üretim betiğiyle `public/audio/topik/voice-3/` altına
   değiştirilir; yalnız el ile üç eser + sergi + menü akışı doğrulanır.
   Gerçek kamerada doğruluk ve çocuk kullanılabilirliği ayrıca denenmelidir.
 
-## El kimliği iyileştirmesi (bu aşamada)
+## Hareket ve iki el iyileştirmesi (2. tur)
+
+- İmleç/kol konumu One Euro filtresiyle yumuşatılır: el dururken titremez,
+  bilinçli harekette gecikme azdır (`smoothCutoff`, `smoothBeta`).
+- İki avuç üst üste binince **atık taşıyan el** görünür kalır; diğeri geçici
+  olarak gizlenir. Taşıyan el kısa süre kaybolursa taşıma hemen iptal olmaz.
+- Taşıyan el bir kutunun üstündeyken kaybolursa (ör. diğer elin arkasında
+  kaldıysa) 0,25 sn sonra atık o kutuya bırakılır; kutu dışında kaybolursa
+  önceki gibi güvenle iptal edilir.
+- Kolun hangi kenardan geleceği artık modelin sol/sağ etiketine değil elin
+  ekrandaki konumuna bağlıdır: ekranın solundaki el her zaman sol koldur.
+
+## El kimliği iyileştirmesi (1. tur)
 
 Yumruk yaparken başparmak gizlenince model sağ/sol etiketini ters
 çevirebiliyordu; artık iki el önce konum sürekliliğiyle eşleştirilir, etiket

@@ -28,7 +28,7 @@ export class CartoonArms {
       }
       node.slot=cursor.colorSlot;
       const delta=Math.max(1,Math.min(50,now-node.last));node.last=now;
-      const target=cursor.gesture==='CLOSED'?1:cursor.gesture==='CLOSING'?.65:cursor.gesture==='OPENING'?.25:cursor.gesture==='OPEN'?0:node.closed;
+      const target=cursor.carrying||cursor.gesture==='CLOSED'?1:cursor.gesture==='CLOSING'?.65:cursor.gesture==='OPENING'?.25:cursor.gesture==='OPEN'?0:node.closed;
       node.closed+=(target-node.closed)*Math.min(1,delta/Math.max(10,armConfig.animationMs/2.5));
       const rotation=((cursor.angle-node.angle+540)%360)-180;node.angle+=rotation*(1-Math.exp(-delta/25));
       const rad=node.angle*Math.PI/180,x=cursor.position.x,y=cursor.position.y;
@@ -43,7 +43,7 @@ export class CartoonArms {
       this.attribute(art,'transform',`translate(${x} ${y}) rotate(${node.angle})`);
       for(const pose of ['.open-art','.fist-art'])this.attribute(art.querySelector(pose)!,'transform',`scale(${node.slot===0?-1:1} 1)`);
       this.attribute(art.querySelector('.open-art')!,'opacity',String(1-node.closed));this.attribute(art.querySelector('.fist-art')!,'opacity',String(node.closed));
-      const lost=cursor.state==='TRACKING_LOST',unknown=cursor.gesture==='UNKNOWN';
+      const lost=cursor.state==='TRACKING_LOST',unknown=cursor.gesture==='UNKNOWN'&&!cursor.carrying;
       this.attribute(node.back,'opacity',lost?'.22':unknown?'.55':'1');
       const left=`${x/1280*100}%`,top=`${y/720*100}%`;
       if(node.front.style.left!==left)node.front.style.left=left;if(node.front.style.top!==top)node.front.style.top=top;

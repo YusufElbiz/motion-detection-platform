@@ -14,6 +14,9 @@ export const workshopSpeech={
   wrong:'Bu sefer onu kullanmayacağız. Parlayan malzemelerden birini al!',
   readyHand:'İkisi de tezgahta! Sihirli düğmeye yumruk yap, birleştirelim!',
   readyMouse:'İkisi de tezgahta! Sihirli düğmeye dokun, birleştirelim!',
+  paintHand:'Boyayı başparmağın ve işaret parmağınla tut. Boyamak istediğin yere götür, parmaklarını aç!',
+  paintMouse:'Boyayı tut, boyamak istediğin yere sürükle ve bırak!',
+  paintDwell:'Bir boyanın üstünde bekle, sonra boyamak istediğin yerde bekle!',
   needColor:'Önce bir boya kutusu seç!',
   colorful:'Rengârenk oldu! Bitirince Bitti düğmesine dokun.',
   gallery:'Bak ne güzel şeyler yaptık! Atıklar çöp değil, yeniden hayat buldu. Teşekkürler, küçük mucit!',
@@ -75,13 +78,14 @@ export class WorkshopScene {
     const hand=this.options.mode()==='hand',p=this.world.phase;
     return p==='gather'?(hand?'✊ Malzemede yumruk yap → tezgaha taşı → elini aç':'☝ Malzemeyi tut → tezgaha bırak')
       :p==='combine'?(hand?'✊ Sihirli düğmede yumruk yap':'☝ Sihirli düğmeye dokun')
-      :p==='paint'?(hand?'✊ Boya kutusunda yumruk yap → yumruğun kapalı resmin üstünde gezdir':'☝ Bir renk seç → resmin üstüne tıkla ya da sürükle')
+      :p==='paint'?(hand?(this.world.brushOnHold?'🤏 Boyayı iki parmağınla tut → parlayan yere götür → parmaklarını aç':'✋ Boyada bekle → boyanacak yerde bekle'):'☝ Boyayı tut → boyanacak yere sürükle → bırak')
       :p==='gallery'?(hand?'✊ Bir düğmede yumruk yap':'☝ Bir düğme seç'):'';
   }
   dispatch(event:GameInputEvent){
     const result=this.world.dispatch(event);if(result)this.handle(result);
     if(event.source==='mouse')this.render(performance.now());
   }
+  private paintSpeech(){return this.options.mode()==='mouse'?workshopSpeech.paintMouse:this.world.brushOnHold?workshopSpeech.paintHand:workshopSpeech.paintDwell;}
   private say(message:string,force=true){this.mascot.say(message,force);}
   private handle(result:WorkshopEvent){
     const now=performance.now();this.lastProgress=now;
@@ -117,7 +121,7 @@ export class WorkshopScene {
   tick(now:number,cursors:readonly HandCursor[]){
     if(!this.active)return;
     const world=this.world;
-    if(world.phase==='crafting'&&now>=this.phaseUntil){world.finishCrafting();this.root.classList.remove('crafting');this.say(world.recipe.crafted);this.lastProgress=now;}
+    if(world.phase==='crafting'&&now>=this.phaseUntil){world.finishCrafting();this.root.classList.remove('crafting');this.say(`${world.recipe.crafted} ${this.paintSpeech()}`);this.lastProgress=now;}
     if(world.phase==='celebrate'&&now>=this.phaseUntil){
       world.next();
       // next() changes the phase; re-read it rather than the narrowed value.
@@ -150,7 +154,8 @@ export class WorkshopScene {
     this.root.querySelectorAll<HTMLElement>('.ws-pot').forEach((pot,i)=>pot.classList.toggle('selected',[...world.brushes.values()].includes(paintColors[i].value)));
     this.mouseBrush.hidden=!(brush&&world.phase==='paint'&&this.options.mode()==='mouse');if(brush)this.mouseBrush.style.setProperty('--brush',brush);
     this.root.querySelectorAll<HTMLElement>('.ws-slot').forEach((slot,i)=>slot.classList.toggle('filled',world.items.some(item=>item.placed&&item.x===L.slots[i].x)));
-    this.root.querySelectorAll<SVGPathElement>('.ws-craft [data-region]').forEach(path=>{const fill=world.paint.get(Number(path.dataset.region));const value=fill??'';if(path.style.fill!==value)path.style.fill=value;});
+    const drops=new Set(world.dropTargets.values());
+    this.root.querySelectorAll<SVGPathElement>('.ws-craft [data-region]').forEach(path=>{const region=Number(path.dataset.region),value=world.paint.get(region)??'';if(path.style.fill!==value)path.style.fill=value;path.classList.toggle('drop-target',drops.has(region));});
     const hint=this.hint(),node=this.root.querySelector('.ws-hint')!;if(node.textContent!==hint)node.textContent=hint;
   }
   private renderGallery(){

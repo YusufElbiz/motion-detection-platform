@@ -13,7 +13,7 @@ function fixture(x=200,y=200,closed=false,id=1,score?:number):TrackedHand{
  const raw=handFixture({x:1-x/1280,y:y/720,closed});
  return {raw,landmarks:raw,palmCenter:palmCenter(raw),wrist:raw[0],thumbTip:raw[4],indexTip:raw[8],id,colorSlot:id-1,handedness:'Right',handednessScore:.9,...(score!==undefined?{modelGesture:{label:closed?'Closed_Fist':'Open_Palm',score}}:{})};
 }
-function driver(){const state=createState();spawn(state,()=>0);state.objects[0].x=200;state.objects[0].y=200;const world=new InteractionController(state);world.enable();const results:string[]=[];const motion=new MotionInput(world,e=>{const r=world.dispatch(e);if(r)results.push(r.kind);});motion.enable();let time=0;return {state,world,motion,results,step(hands:TrackedHand[],delta=40,ambiguous=false){time+=delta;motion.update({timestamp:time,hands,ambiguous});return time;}};}
+function driver(){const state=createState();spawn(state,()=>0);state.objects[0].x=200;state.objects[0].y=200;const world=new InteractionController(state);world.enable();const results:string[]=[];const motion=new MotionInput(world,e=>{const r=world.dispatch(e);if(r)results.push(r.kind);});motion.settings.smoothCutoff=0;motion.enable();let time=0;return {state,world,motion,results,step(hands:TrackedHand[],delta=40,ambiguous=false){time+=delta;motion.update({timestamp:time,hands,ambiguous});return time;}};}
 test('four-finger geometry recognizes open/fist independently of scale and 3D rotation',()=>{
  for(const closed of [false,true])for(const rotation of [0,45,90,180,270])for(const tilt of [-40,0,40])for(const scale of [.5,1,1.5]){
   const result=landmarkPose(handFixture({closed,rotation,tilt,scale}));assert.equal(result.pose,closed?'CLOSED':'OPEN',`${closed}/${rotation}/${tilt}/${scale}`);assert.equal(result.fingers.length,4);
@@ -146,4 +146,15 @@ test('fast carry survives both camera-space association and game-space movement 
  step(500,300,true,100);assert.equal(d.motion.cursors[0].id,id);assert.equal(d.world.heldIds.size,1);
  for(const [x,y]of [[400,400],[304,500],[304,590]])step(x,y,true,100);
  for(let i=0;i<4;i++)step(304,590,false);assert.equal(d.state.score,1);
+});
+
+test('cursor smoothing calms a jittering still hand but follows a real move',()=>{
+ const state=createState();const world=new InteractionController(state);world.enable();
+ const motion=new MotionInput(world,e=>{world.dispatch(e);});motion.enable();let time=0;
+ const step=(x:number)=>{time+=40;motion.update({timestamp:time,hands:[fixture(x,300)],ambiguous:false});return motion.cursors[0].position.x;};
+ for(let i=0;i<5;i++)step(600);
+ const jitter=[630,570,630,570,630,570].map(step);
+ assert.ok(Math.max(...jitter)-Math.min(...jitter)<30,`still-hand jitter of 60 px must shrink, got ${Math.max(...jitter)-Math.min(...jitter)}`);
+ let x=0;for(let i=0;i<12;i++)x=step(900);
+ assert.ok(Math.abs(x-900)<15,`a deliberate move must arrive, got ${x}`);
 });

@@ -22,15 +22,17 @@ try{
    constructor(url,options){super(url,options);if(!String(url).includes('inference-worker.js'))return;this.addEventListener('message',e=>{
     if(e.data.kind!=='result')return;
     e.data.result.detections=window.__hands.map((h,index)=>{
-     const landmarks=window.__makeHand({rotation:90,tilt:65,...h});
+     const options={rotation:90,tilt:65,...h},landmarks=window.__makeHand(options);
+     // Pinch: index curled onto the thumb tip, other fingers open.
+     if(h.pinch){const closed=window.__makeHand({...options,closed:true});for(let i=5;i<=8;i++)landmarks[i]=closed[i];landmarks[4]={...landmarks[8]};}
      return {landmarks,worldLandmarks:landmarks.map(p=>({x:p.x*4/3*.3,y:p.y*.3,z:p.z*4/3*.3})),handedness:index?'Left':'Right',handednessScore:.91,modelGesture:{label:'None',score:.96}};
     });
    });}
   };
  });
- const set=(x,y,closed)=>page.evaluate(({x,y,closed})=>{window.__hands=[{x:.85-x/1280*.7,y:.15+y/720*.7,closed}];},{x,y,closed});
+ const set=(x,y,closed,pinch=false)=>page.evaluate(({x,y,closed,pinch})=>{window.__hands=[{x:.85-x/1280*.7,y:.15+y/720*.7,closed,pinch}];},{x,y,closed,pinch});
  let here={x:640,y:360};
- async function move(x,y,closed){for(let i=1;i<=10;i++){await set(here.x+(x-here.x)*i/10,here.y+(y-here.y)*i/10,closed);await page.waitForTimeout(65);}here={x,y};await page.waitForTimeout(150);}
+ async function move(x,y,closed,pinch=false){for(let i=1;i<=10;i++){await set(here.x+(x-here.x)*i/10,here.y+(y-here.y)*i/10,closed,pinch);await page.waitForTimeout(65);}here={x,y};await page.waitForTimeout(300);}
  async function fist(x,y){await move(x,y,false);await page.waitForTimeout(150);await set(x,y,true);await page.waitForTimeout(350);}
  async function open(){await set(here.x,here.y,false);await page.waitForTimeout(350);}
  const logical=selector=>page.locator(selector).first().evaluate(n=>({x:parseFloat(n.style.left)*12.8,y:parseFloat(n.style.top)*7.2}));
@@ -56,14 +58,18 @@ try{
   await page.waitForFunction(()=>document.querySelector('#workshop').dataset.phase==='combine');
   await move(640,330,false);await fist(640,250);await open();
   await page.waitForFunction(()=>document.querySelector('#workshop').dataset.phase==='paint',{},{timeout:5000});
-  // Close the fist on a paint pot, then slide the closed fist across the craft.
-  await fist(88+104*(round%2),225);await move(500,300,true);
-  for(const x of [540,600,660,720,780])await move(x,330,true);
+  // Pinch paint from a pot, carry it to the craft centre, open the fingers.
+  const pot={x:88+104*(round%2),y:225};
+  await move(pot.x,pot.y,false);await page.waitForTimeout(250);await set(pot.x,pot.y,false,true);await page.waitForTimeout(450);
+  assert.equal(await page.locator('.ws-pot.selected').count(),1,`round ${round}: pinching a pot picks its colour`);
+  await move(640,380,false,true);
+  await page.locator('.ws-craft .drop-target').waitFor({timeout:3000});
+  assert.equal(await page.locator('.ws-craft [data-region]').evaluateAll(paths=>paths.filter(p=>p.style.fill).length),0,'carrying paint must not paint yet');
   await open();
   const painted=await page.locator('.ws-craft [data-region]').evaluateAll(paths=>paths.filter(p=>p.style.fill).length);
-  assert.ok(painted>=1,`round ${round}: sliding a loaded fist must paint at least one part (painted ${painted})`);
+  assert.equal(painted,1,`round ${round}: opening the pinch paints exactly the part under it (painted ${painted})`);
   if(round===0)await page.screenshot({path:'docs/screenshots/workshop-paint.png'});
-  await move(1060,610,false);await fist(1060,610);await open();
+  await move(1110,640,false);await fist(1110,640);await open();
   await page.waitForFunction(()=>['celebrate','gather','gallery'].includes(document.querySelector('#workshop').dataset.phase));
   await page.waitForFunction(()=>document.querySelector('#workshop').dataset.phase!=='celebrate',{},{timeout:8000});
  }
@@ -73,7 +79,7 @@ try{
  await move(710,625,false);await fist(710,625);await open();
  await page.locator('#menu').waitFor({state:'visible',timeout:5000});
  assert.deepEqual(errors,[]);
- console.log('PASS: hand-only workshop — gather, wrong-free placement, combine, fist paint stroke, done, gallery and menu exit.');
+ console.log('PASS: hand-only workshop — gather, combine, pinch-carry-drop painting of one part, done, gallery and menu exit.');
 }catch(error){
  console.error('FAILURE:',error.stack??String(error));
  if(page){await page.evaluate(()=>{document.querySelector('#gesture-debug').checked=true;});await page.waitForTimeout(350);console.error('DIAGNOSTICS:',(await page.locator('#gesture-details').textContent()).slice(0,2500));}

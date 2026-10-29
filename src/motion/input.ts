@@ -9,11 +9,14 @@ import {FistRecognizer,landmarkPose,fistDefaults,type PoseMeasurement,type FistS
 import {classifyPose,type PoseEvidence} from '../gesture-lab/geometry.ts';
 import {gestureDefaults} from '../gesture-lab/gesture.ts';
 import {permittedJump} from './continuity.ts';
+import {OneEuro} from '../gesture-lab/filter.ts';
 // Anything hands can grab: the sorting playfield or the workshop.
 export interface MotionWorld {
   heldBy(pointerId:string):number|undefined;
   objectAt(point:Position,pointerId:string):{id:number}|undefined;
   targetBin(point:Position):string|undefined;
+  // True while a thumb + index pinch should also grab (workshop paint).
+  readonly pinchGrab?:boolean;
 }
 export type MotionState='IDLE'|'HOVERING'|'GRAB_PENDING'|'CARRYING'|'RELEASE_PENDING'|'RELEASED'|'TRACKING_LOST';
 interface HandContext {
@@ -21,6 +24,7 @@ interface HandContext {
   lastSeen:number;readyAt:number;lostAt?:number;recoveryAt?:number;cooldownUntil:number;
   pinch:PinchRecognizer;dwell:DwellTimer;fist:FistRecognizer;
   measurement:PoseMeasurement&{evidence?:PoseEvidence;modelGesture?:TrackedHand['modelGesture']};rawPalm:{x:number;y:number};smoothPalm:{x:number;y:number};rawMapped:Position;angle:number;unknownAt?:number;
+  filter:[OneEuro,OneEuro];lastRaw:Position;
 }
 export interface HandCursor {id:string;colorSlot:number;position:Position;state:MotionState;progress:number;carrying:boolean;gesture:FistState;angle:number}
 export function mapHandPoint(point:{x:number;y:number;z:number},bounds:Bounds|undefined,sensitivity:number){
@@ -48,6 +52,7 @@ export class MotionInput {
   // Switching worlds releases every carry first; nothing moves between scenes.
   useWorld(world:MotionWorld){this.reset();this.world=world;}
   get cursors():HandCursor[]{return [...this.contexts.values()].map(c=>({id:c.id,colorSlot:c.colorSlot,position:{...c.position},state:c.state,progress:c.progress,carrying:this.world.heldBy(c.id)!==undefined,gesture:c.fist.state,angle:c.angle}));}
+  get carryingHandIds(){return [...this.contexts.values()].filter(c=>this.world.heldBy(c.id)!==undefined).map(c=>Number(c.id.slice(5)));}
   get diagnostics(){return [...this.contexts.values()].map(c=>({id:c.id,gesture:c.fist.state,measurement:c.measurement,rawPalm:c.rawPalm,smoothedPalm:c.smoothPalm,rawMapped:c.rawMapped,mapped:c.position,confirmationMs:c.fist.lastConfirmationMs,objectId:this.world.heldBy(c.id)??null,state:c.state}));}
   enable(){this.reset();this.enabled=true;}
   disable(){this.reset();this.enabled=false;}
@@ -55,8 +60,8 @@ export class MotionInput {
   update(frame:TrackingFrame,now=frame.timestamp){
     if(!this.enabled||frame.timestamp<=this.lastFrame)return;this.lastFrame=frame.timestamp;
     for(const handId of frame.suppressedHandIds??[]){
-      const id=`hand-${handId}`,context=this.contexts.get(id);
-      if(context){this.emit(context,'input-disabled');this.contexts.delete(id);}
+      // Briefly hidden behind the other hand: keep the carry for the loss grace.
+      const context=this.contexts.get(`hand-${handId}`);if(context)this.lose(context,now);
     }
     if(frame.ambiguous){
       // Association during overlap is not trustworthy: never transfer a carry.
@@ -71,14 +76,14 @@ export class MotionInput {
       const position=this.settings.method==='fist'?clampPalmAnchor(mappedAnchor):mappedAnchor;
       // Fist mode already measures all four fingers in classifyPose. Avoid the
       // unused pinch and second legacy geometry pass on every hand/sample.
-      const ratio=this.settings.method==='pinch'?pinchRatio(hand.raw,this.aspect):undefined;
+      const ratio=this.settings.method==='pinch'||this.world.pinchGrab?pinchRatio(hand.raw,this.aspect):undefined;
       const geometry:PoseMeasurement=this.settings.method==='fist'?{pose:'UNKNOWN',score:0,source:'heuristic',fingers:[]}:landmarkPose(hand.raw,this.aspect,this.thresholds);
       // Same color slot with a new track ID cannot inherit the previous carry.
       // A different hand still visible in this frame is not an inheritance.
       for(const old of this.contexts.values())if(old.id!==id&&!present.has(old.id)&&old.colorSlot===hand.colorSlot){this.emit(old,'input-disabled');this.contexts.delete(old.id);}
       let context=this.contexts.get(id);
       if(context)context.colorSlot=hand.colorSlot;
-      if(!context){context={id,colorSlot:hand.colorSlot,position,state:'IDLE',progress:0,lastSeen:now,readyAt:now,cooldownUntil:0,pinch:new PinchRecognizer(),dwell:new DwellTimer(),fist:new FistRecognizer(),measurement:geometry,rawPalm:palmCenter(hand.raw),smoothPalm:hand.palmCenter,rawMapped:position,angle:0};this.contexts.set(id,context);}
+      if(!context){context={id,colorSlot:hand.colorSlot,position,state:'IDLE',progress:0,lastSeen:now,readyAt:now,cooldownUntil:0,pinch:new PinchRecognizer(),dwell:new DwellTimer(),fist:new FistRecognizer(),measurement:geometry,rawPalm:palmCenter(hand.raw),smoothPalm:hand.palmCenter,rawMapped:position,angle:0,filter:[this.makeFilter(),this.makeFilter()],lastRaw:position};this.contexts.set(id,context);}
       if(this.settings.method==='fist'){
         // Use the SAME 3D decision as the accepted laboratory. Keep the game
         // ownership/arming/release state machine; raw model None is not a veto.
@@ -105,12 +110,15 @@ export class MotionInput {
         }
       }
       const jumpLimit=this.settings.method==='fist'?permittedJump(this.settings.maxJumpDistance,now-context.lastSeen):this.settings.maxJumpDistance;
-      if(Math.hypot(position.x-context.position.x,position.y-context.position.y)>jumpLimit){this.rearm(context,position,now);continue;}
-      context.position=position;context.lastSeen=now;
+      if(Math.hypot(position.x-context.lastRaw.x,position.y-context.lastRaw.y)>jumpLimit){this.rearm(context,position,now);continue;}
+      context.lastRaw=position;
+      // Calm cursor: strong smoothing at rest, still responsive on fast moves.
+      context.position=this.settings.smoothCutoff>0?{x:context.filter[0].update(position.x,now),y:context.filter[1].update(position.y,now)}:position;
+      context.lastSeen=now;
       this.emit(context,'pointer');
       if(now-context.readyAt<this.settings.handReadyMs)continue;
       if(this.world.heldBy(id)!==undefined)this.emit(context,'grab-held');
-      if(this.settings.method==='fist')this.fist(context,now);
+      if(this.settings.method==='fist')this.fist(context,now,ratio);
       else if(this.settings.method==='pinch'){context.fist.update(geometry.pose,now);this.pinch(context,ratio!,now);}
       else {context.fist.update(geometry.pose,now);this.dwell(context,now);}
     }
@@ -121,7 +129,12 @@ export class MotionInput {
     if(!this.enabled)return;
     for(const context of this.contexts.values()){
       if(now-context.lastSeen>this.settings.maxEvidenceGapMs)this.lose(context,context.lastSeen+this.settings.maxEvidenceGapMs);
-      if(context.lostAt!==undefined&&now-context.lostAt>this.settings.lossGraceMs){this.emit(context,'input-disabled');this.contexts.delete(context.id);}
+      if(context.lostAt===undefined)continue;
+      // Lost while carrying over a bin (e.g. hidden behind the other hand):
+      // the child was dropping it, so drop it rather than cancel the carry.
+      const overBin=this.world.heldBy(context.id)!==undefined&&this.world.targetBin(context.position)!==undefined;
+      if(overBin&&now-context.lostAt>this.settings.binDropLossMs){this.emit(context,'grab-release');this.emit(context,'input-disabled');this.contexts.delete(context.id);}
+      else if(now-context.lostAt>this.settings.lossGraceMs){this.emit(context,'input-disabled');this.contexts.delete(context.id);}
     }
   }
   private emit(context:HandContext,type:Parameters<InputSink>[0]['type'],targetId?:number){
@@ -135,21 +148,25 @@ export class MotionInput {
     context.state='TRACKING_LOST';context.lostAt=now;context.recoveryAt=undefined;context.progress=0;context.dwell.reset();this.emit(context,'pointer-lost');
   }
   private rearm(context:HandContext,position:Position,now:number){
-    this.emit(context,'input-disabled');context.position=position;context.lastSeen=now;context.readyAt=now;context.state='IDLE';context.progress=0;context.lostAt=undefined;context.recoveryAt=undefined;context.unknownAt=undefined;context.dwell.reset();context.pinch.reset();context.fist.reset();
+    this.emit(context,'input-disabled');context.position=position;context.lastRaw=position;context.filter.forEach(f=>f.reset());context.lastSeen=now;context.readyAt=now;context.state='IDLE';context.progress=0;context.lostAt=undefined;context.recoveryAt=undefined;context.unknownAt=undefined;context.dwell.reset();context.pinch.reset();context.fist.reset();
   }
-  private fist(context:HandContext,now:number){
+  private makeFilter(){const f=new OneEuro();f.minCutoff=this.settings.smoothCutoff;f.beta=this.settings.smoothBeta;f.resetAfterMs=400;return f;}
+  private fist(context:HandContext,now:number,ratio?:number){
     context.fist.confirmationMs=Math.max(60,this.thresholds.confirmMs);
     context.fist.minimumSamples=2;
     const object=this.world.objectAt(context.position,context.id);
     const result=context.fist.update(context.measurement.pose,now);
-    if(context.measurement.pose==='UNKNOWN'){
+    // A pinch is neither open nor fist, so it must not count as a lost hand.
+    const pinching=this.world.pinchGrab===true&&ratio!==undefined;
+    if(context.measurement.pose==='UNKNOWN'&&!pinching){
       context.unknownAt??=now;
       if(now-context.unknownAt>220){this.lose(context,now);return;}
     }else context.unknownAt=undefined;
-    if(result.grabbed&&object)this.emit(context,'grab-start',object.id);
+    const pinch=pinching?context.pinch.update(ratio!,now):{started:false,released:false};
+    if((result.grabbed||pinch.started)&&object&&this.world.heldBy(context.id)===undefined)this.emit(context,'grab-start',object.id);
     const held=this.world.heldBy(context.id)!==undefined;
-    if(result.released&&held){this.emit(context,'grab-release');context.state='RELEASED';context.progress=0;return;}
-    context.state=held?(context.fist.state==='OPENING'?'RELEASE_PENDING':'CARRYING'):context.fist.state==='CLOSING'?'GRAB_PENDING':object?'HOVERING':'IDLE';
+    if((result.released||pinch.released)&&held){this.emit(context,'grab-release');context.state='RELEASED';context.progress=0;return;}
+    context.state=held?(context.fist.state==='OPENING'||context.pinch.state==='RELEASING'?'RELEASE_PENDING':'CARRYING'):context.fist.state==='CLOSING'||context.pinch.state==='CLOSING'?'GRAB_PENDING':object?'HOVERING':'IDLE';
     context.progress=0; // Fist control has no dwell ring or long hold requirement.
   }
   private pinch(context:HandContext,ratio:number,now:number){

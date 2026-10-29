@@ -8,46 +8,47 @@ export interface Recipe {
 const star=(cx:number,cy:number,outer:number,inner:number)=>`M${Array.from({length:10},(_,i)=>{const a=-Math.PI/2+i*Math.PI/5,r=i%2?inner:outer;return `${(cx+Math.cos(a)*r).toFixed(1)} ${(cy+Math.sin(a)*r).toFixed(1)}`;}).join(' L')}Z`;
 const region=(index:number,d:string)=>`<path class="craft-region" data-region="${index}" d="${d}"/>`;
 
+// Few, large parts: each one is easy to hit with a whole hand.
 export const recipes:Recipe[]=[
   {
     id:'robot',name:'Robot',items:['paper-box','metal-can'],distractor:'glass-bottle',
-    regions:['Kafa','Gövde','Sol kol','Sağ kol','Ayaklar'],
+    regions:['Kafa','Gövde','Kollar','Ayaklar'],
     gather:'Karton kutuyu ve metal içecek kutusunu bul. Onları tezgaha taşı!',
-    crafted:'Vay! Bir robot yaptık! İstersen boyayabiliriz. Bir renk seç, sonra robota sür!',
+    crafted:'Vay! Bir robot yaptık! İstersen boyayabiliriz.',
     finished:'Ne güzel bir robot! Atıklar çöp değil, hazinedir!',
-    art:region(4,'M146 252h36v48h-36Z M218 252h36v48h-36Z')+region(2,'M122 165q-48 8-54 58l24 5q5-30 30-38Z')+region(3,'M278 165q48 8 54 58l-24 5q-5-30-30-38Z')
-      +region(1,'M120 150q0-12 12-12h136q12 0 12 12v100q0 10-12 10H132q-12 0-12-10Z')+region(0,'M152 54q0-14 14-14h68q14 0 14 14v70q0 14-14 14h-68q-14 0-14-14Z')
-      +`<g class="craft-detail"><path d="M200 40V16" stroke-width="5"/><circle cx="200" cy="13" r="8" fill="#f2c94c"/><path d="M152 60h96M152 118h96" stroke-width="3" opacity=".45"/><circle cx="181" cy="84" r="13" fill="#fff"/><circle cx="219" cy="84" r="13" fill="#fff"/><circle cx="183" cy="86" r="6" fill="#3d2f27" stroke="none"/><circle cx="221" cy="86" r="6" fill="#3d2f27" stroke="none"/><path d="M184 110q16 12 32 0" stroke-width="4"/><path d="M120 176h160M200 138v38" stroke-width="3" opacity=".4"/><circle cx="178" cy="214" r="9" fill="#fff"/><circle cx="222" cy="214" r="9" fill="#fff"/><path d="M200 138v-4" stroke-width="10"/></g>`,
+    art:region(3,'M140 250h46v60h-46Z M214 250h46v60h-46Z')+region(2,'M120 156H80q-16 0-16 16v70h38v-50h18Z M280 156h40q16 0 16 16v70h-38v-50h-18Z')
+      +region(1,'M116 146q0-14 14-14h140q14 0 14 14v98q0 12-14 12H130q-14 0-14-12Z')+region(0,'M138 34q0-16 16-16h92q16 0 16 16v80q0 16-16 16h-92q-16 0-16-16Z')
+      +`<g class="craft-detail"><path d="M200 18V4" stroke-width="5"/><circle cx="200" cy="2" r="8" fill="#f2c94c"/><circle cx="177" cy="66" r="14" fill="#fff"/><circle cx="223" cy="66" r="14" fill="#fff"/><circle cx="179" cy="68" r="6" fill="#3d2f27" stroke="none"/><circle cx="225" cy="68" r="6" fill="#3d2f27" stroke="none"/><path d="M180 98q20 13 40 0" stroke-width="4"/><circle cx="180" cy="196" r="9" fill="#fff"/><circle cx="220" cy="196" r="9" fill="#fff"/></g>`,
   },
   {
     id:'pencil-cup',name:'Kalemlik',items:['metal-food-can','paper-sheet'],distractor:'plastic-cup',
-    regions:['Kâğıt sargı','Kenarlar','Kırmızı kalem','Orta kalem','Sağ kalem','Yıldız'],
+    regions:['Kâğıt sargı','Kenarlar','Kalemler','Yıldız'],
     gather:'Konserve kutusunu ve kâğıdı bul. Onları tezgaha taşı!',
-    crafted:'Yaşasın! Bir kalemlik yaptık! İstersen boyayabiliriz. Bir renk seç, sonra kalemliğe sür!',
+    crafted:'Yaşasın! Bir kalemlik yaptık! İstersen boyayabiliriz.',
     finished:'Kalemlerin artık yeni bir evi var! Harika iş çıkardın!',
-    art:region(2,'M138 130V64l14-26 14 26v66Z')+region(3,'M186 130V44l14-26 14 26v86Z')+region(4,'M234 130V74l14-26 14 26v56Z')
-      +region(0,'M118 150h164v118H118Z')+region(1,'M114 126h172v26H114Z M114 266h172v26H114Z')+region(5,star(200,209,34,15))
-      +`<g class="craft-detail"><path d="M147 47l5-9 5 9Z M195 27l5-9 5 9Z M243 57l5-9 5 9Z" fill="#3d2f27"/><path d="M138 64h28M186 44h28M234 74h28" stroke-width="3"/><path d="M128 138h144M128 280h144" stroke-width="2" opacity=".4"/></g>`,
+    art:region(2,'M120 132V60l20-34 20 34v72Z M180 132V40l20-34 20 34v92Z M240 132V70l20-34 20 34v62Z')
+      +region(0,'M106 152h188v112H106Z')+region(1,'M100 126h200v28H100Z M100 262h200v30H100Z')+region(3,star(200,208,46,20))
+      +`<g class="craft-detail"><path d="M131 41l9-15 9 15Z M191 21l9-15 9 15Z M251 51l9-15 9 15Z" fill="#3d2f27"/><path d="M120 60h40M180 40h40M240 70h40" stroke-width="3"/></g>`,
   },
   {
     id:'car',name:'Oyuncak araba',items:['plastic-bottle','metal-lid'],distractor:'paper-newspaper',
-    regions:['Gövde','Camlar','Arka teker','Far','Ön teker'],
+    regions:['Gövde','Çatı','Camlar','Tekerler'],
     gather:'Plastik şişeyi ve metal kavanoz kapağını bul. Onları tezgaha taşı!',
-    crafted:'Bir oyuncak araba yaptık! İstersen boyayabiliriz. Bir renk seç, sonra arabaya sür!',
+    crafted:'Bir oyuncak araba yaptık! İstersen boyayabiliriz.',
     finished:'Vınnn! Araban yola çıkmaya hazır!',
-    art:region(0,'M48 236v-46q0-26 26-26h44l34-50h112l40 50h28q28 0 28 26v46Z')+region(1,'M160 158l22-34h44v34Z M240 158v-34h36l26 34Z')
-      +region(3,'M350 178h18q8 0 8 8v22q0 8-8 8h-18Z')+region(2,'M120 236m-40 0a40 40 0 1 0 80 0a40 40 0 1 0-80 0')+region(4,'M294 236m-40 0a40 40 0 1 0 80 0a40 40 0 1 0-80 0')
-      +`<g class="craft-detail"><circle cx="120" cy="236" r="12" fill="#fff"/><circle cx="294" cy="236" r="12" fill="#fff"/><path d="M234 168v60M70 196h30" stroke-width="3" opacity=".45"/><path d="M118 164h0" stroke-width="3"/><circle cx="214" cy="196" r="5" fill="#3d2f27" stroke="none"/></g>`,
+    art:region(1,'M146 164l36-56h112l44 56Z')+region(0,'M36 254v-58q0-34 34-34h264q34 0 34 34v58Z')+region(2,'M174 154l22-34h46v34Z M256 154v-34h32l24 34Z')
+      +region(3,'M120 254m-46 0a46 46 0 1 0 92 0a46 46 0 1 0-92 0 M290 254m-46 0a46 46 0 1 0 92 0a46 46 0 1 0-92 0')
+      +`<g class="craft-detail"><circle cx="120" cy="254" r="13" fill="#fff"/><circle cx="290" cy="254" r="13" fill="#fff"/><circle cx="352" cy="194" r="9" fill="#f6cd45"/><path d="M248 172v70" stroke-width="3" opacity=".45"/></g>`,
   },
   {
     id:'lantern',name:'Kavanoz fener',items:['glass-jar','paper-bag'],distractor:'metal-tray',
-    regions:['Cam','Kapak','Sap','Yıldız','Ay'],
+    regions:['Cam','Kapak','Yıldız','Ay'],
     gather:'Cam kavanozu ve kâğıt torbayı bul. Onları tezgaha taşı!',
-    crafted:'Bir kavanoz fener yaptık! İstersen boyayabiliriz. Bir renk seç, sonra fenere sür!',
+    crafted:'Bir kavanoz fener yaptık! İstersen boyayabiliriz.',
     finished:'Fenerin geceyi pırıl pırıl aydınlatacak!',
-    art:region(2,'M134 98q66-100 132 0l-15 6q-51-74-102 0Z')+region(0,'M146 124h108q22 16 22 46v94q0 26-26 26H150q-26 0-26-26v-94q0-30 22-46Z')+region(1,'M134 94h132q8 0 8 8v18q0 8-8 8H134q-8 0-8-8v-18q0-8 8-8Z')
-      +region(3,star(228,222,36,16))+region(4,'M172 150a30 30 0 1 0 0 56a24 24 0 1 1 0-56Z')
-      +`<g class="craft-detail"><path d="M150 140q-10 30-6 60" stroke="#fff" stroke-width="6" opacity=".7"/><path d="M134 106h132" stroke-width="2" opacity=".4"/></g>`,
+    art:region(0,'M136 128h128q26 18 26 52v96q0 30-30 30H140q-30 0-30-30v-96q0-34 26-52Z')+region(1,'M124 90h152q10 0 10 10v22q0 10-10 10H124q-10 0-10-10v-22q0-10 10-10Z')
+      +region(2,star(240,240,46,20))+region(3,'M184 148a38 38 0 1 0 0 76a30 30 0 1 1 0-76Z')
+      +`<g class="craft-detail"><path d="M126 94q74-100 148 0" stroke-width="8"/><path d="M148 146q-12 34-6 70" stroke="#fff" stroke-width="6" opacity=".7"/></g>`,
   },
 ];
 
