@@ -1,5 +1,4 @@
 import type {InputSink,Position} from '../input.ts';
-import {InteractionController} from '../interaction.ts';
 import {config} from '../config.ts';
 import {mapPoint,clamp01,palmCenter} from '../tracking/coordinates.ts';
 import type {Bounds,TrackingFrame,TrackedHand} from '../tracking/types.ts';
@@ -10,6 +9,12 @@ import {FistRecognizer,landmarkPose,fistDefaults,type PoseMeasurement,type FistS
 import {classifyPose,type PoseEvidence} from '../gesture-lab/geometry.ts';
 import {gestureDefaults} from '../gesture-lab/gesture.ts';
 import {permittedJump} from './continuity.ts';
+// Anything hands can grab: the sorting playfield or the workshop.
+export interface MotionWorld {
+  heldBy(pointerId:string):number|undefined;
+  objectAt(point:Position,pointerId:string):{id:number}|undefined;
+  targetBin(point:Position):string|undefined;
+}
 export type MotionState='IDLE'|'HOVERING'|'GRAB_PENDING'|'CARRYING'|'RELEASE_PENDING'|'RELEASED'|'TRACKING_LOST';
 interface HandContext {
   id:string;colorSlot:number;position:Position;state:MotionState;progress:number;
@@ -37,9 +42,11 @@ export class MotionInput {
   private contexts=new Map<string,HandContext>();
   private lastFrame=-Infinity;
   private enabled=false;
-  private world:InteractionController;
+  private world:MotionWorld;
   private sink:InputSink;
-  constructor(world:InteractionController,sink:InputSink){this.world=world;this.sink=sink;}
+  constructor(world:MotionWorld,sink:InputSink){this.world=world;this.sink=sink;}
+  // Switching worlds releases every carry first; nothing moves between scenes.
+  useWorld(world:MotionWorld){this.reset();this.world=world;}
   get cursors():HandCursor[]{return [...this.contexts.values()].map(c=>({id:c.id,colorSlot:c.colorSlot,position:{...c.position},state:c.state,progress:c.progress,carrying:this.world.heldBy(c.id)!==undefined,gesture:c.fist.state,angle:c.angle}));}
   get diagnostics(){return [...this.contexts.values()].map(c=>({id:c.id,gesture:c.fist.state,measurement:c.measurement,rawPalm:c.rawPalm,smoothedPalm:c.smoothPalm,rawMapped:c.rawMapped,mapped:c.position,confirmationMs:c.fist.lastConfirmationMs,objectId:this.world.heldBy(c.id)??null,state:c.state}));}
   enable(){this.reset();this.enabled=true;}

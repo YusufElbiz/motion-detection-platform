@@ -1,3 +1,5 @@
+**Yeni: [2. Bölüm — Geri Dönüşüm Atölyesi](docs/WORKSHOP.md).** Ayrılan atıklarla Topik eşliğinde birleştir ve boya; tamamen elle (yumruk/avuç) oynanır. Tarayıcı testi: `node scripts/workshop-browser-test.mjs` (derlemeden sonra).
+
 # ECO HEROES — Phases 1–3
 
 **Atık içerikleri güncellendi:** [16 farklı atık ve rastgele düşme düzeni](docs/WASTE_VARIETY.md). Her malzemede dört özgün SVG görseli var; malzeme sırası, görsel ve düşme konumu karışık seçilir. Doğru kutuya göre sabit bir düşme sütunu yoktur.

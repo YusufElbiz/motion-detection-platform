@@ -23,6 +23,7 @@ export class MascotSpeech {
  private lastSpoken=-Infinity;
  private timer?:ReturnType<typeof setTimeout>;
  private audio?:HTMLAudioElement;
+ private utterance?:SpeechSynthesisUtterance;
  constructor(private panel:HTMLElement,private text:HTMLElement,private muted:()=>boolean,private onSpeaking:(active:boolean)=>void=()=>{}){}
  say(message:string,force=false,onDone?:()=>void){
   this.text.textContent=message;this.panel.hidden=false;
@@ -30,7 +31,7 @@ export class MascotSpeech {
   if(this.timer)clearTimeout(this.timer);
   this.timer=setTimeout(()=>this.panel.classList.remove('greeting'),3200);
   if(this.muted()||(!force&&performance.now()-this.lastSpoken<8000))return;
-  const clip=voiceClips.get(message);if(!clip)return;
+  const clip=voiceClips.get(message);if(!clip){this.speak(message,onDone);return;}
   try{
    this.stopAudio();
    const audio=new Audio(`/audio/topik/voice-3/${clip}.mp3`);audio.preload='auto';audio.volume=.8;this.audio=audio;
@@ -42,7 +43,25 @@ export class MascotSpeech {
    void audio.play().catch(complete);
   }catch{/* The same short speech is always visible as text. */}
  }
- private stopAudio(){const old=this.audio;this.audio=undefined;if(old){old.pause();old.removeAttribute('src');old.load();}this.panel.classList.remove('speaking');this.onSpeaking(false);}
+ // Lines without a recorded clip (the workshop) use a local Turkish system
+ // voice when the browser has one; the bubble text is always shown anyway.
+ private speak(message:string,onDone?:()=>void){
+  const synth=typeof speechSynthesis==='undefined'?undefined:speechSynthesis;
+  const voice=synth?.getVoices().find(v=>v.lang.toLowerCase().startsWith('tr'));
+  if(!synth||!voice||typeof SpeechSynthesisUtterance==='undefined'){onDone?.();return;}
+  this.stopAudio();
+  const utterance=new SpeechSynthesisUtterance(message);utterance.voice=voice;utterance.lang=voice.lang;utterance.pitch=1.4;utterance.rate=.95;utterance.volume=.85;
+  this.utterance=utterance;this.lastSpoken=performance.now();
+  utterance.onstart=()=>{if(this.utterance===utterance){this.panel.classList.add('speaking');this.onSpeaking(true);}};
+  const complete=()=>{if(this.utterance===utterance){this.utterance=undefined;this.panel.classList.remove('speaking');this.onSpeaking(false);onDone?.();}};
+  utterance.onend=complete;utterance.onerror=complete;
+  synth.speak(utterance);
+ }
+ private stopAudio(){
+  const old=this.audio;this.audio=undefined;if(old){old.pause();old.removeAttribute('src');old.load();}
+  if(this.utterance){this.utterance=undefined;speechSynthesis.cancel();}
+  this.panel.classList.remove('speaking');this.onSpeaking(false);
+ }
  stop(){if(this.timer)clearTimeout(this.timer);this.stopAudio();this.panel.classList.remove('greeting');}
  hide(){this.stop();this.panel.hidden=true;}
 }

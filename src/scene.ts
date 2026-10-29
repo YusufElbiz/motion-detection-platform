@@ -14,6 +14,7 @@ import {CalibrationManager} from './tracking/calibration.ts';
 import {TwoHandsReady} from './motion/readyStart.ts';
 import {mirrorPoint} from './tracking/coordinates.ts';
 import {CartoonArms} from './motion/arms.ts';
+import {WorkshopScene} from './workshop/scene.ts';
 import type {GrabMethod} from './motion/config.ts';
 import type {TrackingEngine} from './tracking/types.ts';
 import {mountTrackingDiagnostics} from './tracking/diagnostics.ts';
@@ -46,6 +47,10 @@ export function mountGameScene(){
   const handsReady=new TwoHandsReady();
   element('setup-progress').insertAdjacentHTML('afterend','<p id="setup-ready-status" class="setup-ready-status" role="status">Alan ayarı tamamlanınca iki elini göster; oyun otomatik başlayacak.</p>');
   const motion=new MotionInput(interaction,dispatch);
+  // Second level: the sorted waste becomes material for the workshop.
+  const game=document.querySelector<HTMLElement>('.game')!;
+  const collected:string[]=[];let workshopActive=false,nextLevel:'sorting'|'workshop'='sorting',resultAdvanceAt=0;
+  const workshop=new WorkshopScene(game,{audio,mode:()=>mode,onExit:choice=>{leaveWorkshop();if(choice==='replay'){nextLevel='sorting';void start();}else returnToMenu();}});
   session.processor.lossTimeoutMs=motion.settings.lossGraceMs+150;
 
   const settings=document.createElement('details');settings.className='motion-settings';
@@ -86,6 +91,7 @@ export function mountGameScene(){
   }
   function handleResult(result:InteractionResult){
     if(result.kind==='correct'){
+      if(result.object.variant)collected.push(result.object.variant);
       const wasGuiding=!!companion.dataset.guideCategory;
       mascotDirector.celebrate();
       if(!state.complete&&encouragementSchedule.take(state.score,activeSeconds))mascot.say(encouragements[Math.floor(state.score/4)%encouragements.length],true);
@@ -101,15 +107,24 @@ export function mountGameScene(){
   }
   function dispatch(event:GameInputEvent){
     if((mode==='mouse')!==(event.source==='mouse'))return;
+    if(workshopActive){workshop.dispatch(event);return;}
     const result=interaction.dispatch(event);if(result)handleResult(result);
-    if(state.complete&&running){audio.stopMusic();running=false;interaction.disable();motion.disable();session.stop();mascot.hide();element('result-count').textContent=`${state.goal} atığı doğru kutularla buluşturdun!`;element('result').hidden=false;resultMascot.say(endingSpeech,true);element<HTMLButtonElement>('again').focus();}
+    if(state.complete&&running){
+      audio.stopMusic();running=false;interaction.disable();motion.disable();
+      // Hand mode keeps the camera for the workshop; inference pauses meanwhile.
+      if(mode==='hand')session.suspended=true;else session.stop();
+      mascot.hide();element('result-count').textContent=`${state.goal} atığı doğru kutularla buluşturdun!`;element('result').hidden=false;
+      resultAdvanceAt=performance.now()+(audio.muted?7000:16000);
+      resultMascot.say(endingSpeech,true,()=>{if(resultAdvanceAt)resultAdvanceAt=Math.min(resultAdvanceAt,performance.now()+1800);});
+      element<HTMLButtonElement>('to-workshop').focus();
+    }
     // Rendering is coalesced into the existing scene animation frame.
     if(event.source==='mouse'||state.complete)render();
   }
   attachMouse(field,dispatch,config.width,config.height);
 
   function renderCursors(){
-    const cursors=running&&!paused&&mode==='hand'?motion.cursors:[];
+    const cursors=(running||workshopActive)&&!paused&&mode==='hand'?motion.cursors:[];
     arms.update(cursors,performance.now());
     element('hand-hint').hidden=mode!=='hand'||!running||paused;
     if(mode==='hand'&&running&&!paused){
@@ -144,8 +159,28 @@ export function mountGameScene(){
     introducing=false;tutorialMascot.hide();beginRound();
   }
   element('instruction-skip').onclick=finishInstructions;
+  function enterWorkshop(){
+    resultAdvanceAt=0;nextLevel='sorting';introducing=false;tutorialMascot.hide();
+    running=false;paused=false;preparing=false;interaction.disable();motion.disable();
+    mascot.hide();resultMascot.stop();mascotDirector.stop();
+    for(const id of ['menu','result','paused','hand-setup'])element(id).hidden=true;
+    element('motion-preview').classList.remove('visible');element('feedback').classList.remove('visible');
+    game.classList.add('workshop-mode');companion.hidden=true;workshopActive=true;
+    environment.update(1,1); // the garden is clean: the workshop happens in it
+    element('nature-status').textContent='Atıklardan yeni şeyler üretelim! 🎨';
+    motion.useWorld(workshop.world);workshop.world.brushOnHold=motion.settings.method!=='dwell';
+    if(mode==='hand'){
+      motion.bounds=calibration.bounds;motion.aspect=video.videoWidth/video.videoHeight||4/3;session.suspended=false;motion.enable();
+      if(!session.active)void session.start();
+    }
+    audio.startMusic();workshop.start(collected);
+  }
+  function leaveWorkshop(){
+    if(!workshopActive)return;
+    workshopActive=false;workshop.stop();motion.disable();motion.useWorld(interaction);game.classList.remove('workshop-mode');
+  }
   function beginRound(){
-    handsReady.reset();
+    handsReady.reset();collected.length=0;motion.useWorld(interaction);
     activeSeconds=0;encouragementSchedule.reset();
     mascotDirector.reset();
     mascot.hide();resultMascot.stop();
@@ -161,19 +196,19 @@ export function mountGameScene(){
     spawn(state);render();feedback(mode==='mouse'?'Atığı tut, resmine benzeyen kutuya bırak! ☝':motion.settings.method==='fist'?'Açık elinle yaklaş. Yumruk yapıp yakala, elini açıp bırak!':motion.settings.method==='dwell'?'Elini atığın üstünde beklet. Halka dolunca yakalarsın!':'Önce parmaklarını aç. Atığın üstünde birleştirerek tut!');
   }
   async function start(){
-    handsReady.reset();introducing=false;tutorialMascot.hide();
-    if(mode==='mouse'){session.stop();showInstructions();return;}
+    handsReady.reset();introducing=false;tutorialMascot.hide();resultAdvanceAt=0;leaveWorkshop();
+    if(mode==='mouse'){session.stop();if(nextLevel==='workshop')enterWorkshop();else showInstructions();return;}
     interaction.disable();motion.disable();preparing=true;running=false;paused=false;setupResume=false;
     for(const id of ['menu','result','paused'])element(id).hidden=true;
     element('hand-setup').hidden=false;element('motion-preview').classList.add('visible');
     showSetup('Kamerayı hazırlıyoruz…');
     session.engine=motion.settings.method==='fist'?element<HTMLSelectElement>('gesture-engine').value as TrackingEngine:'landmarks';
     if(!await session.start())return;
-    if(calibration.stage==='ready'){showInstructions();return;}
+    if(calibration.stage==='ready'){if(nextLevel==='workshop')enterWorkshop();else showInstructions();return;}
     calibration.start();showSetup();
   }
   function returnToMenu(){
-    handsReady.reset();introducing=false;tutorialMascot.hide();
+    handsReady.reset();introducing=false;tutorialMascot.hide();resultAdvanceAt=0;nextLevel='sorting';leaveWorkshop();
     audio.stopMusic();
     mascotDirector.stop();
     mascot.hide();resultMascot.stop();
@@ -188,13 +223,13 @@ export function mountGameScene(){
     element<HTMLButtonElement>('start').textContent=mode==='mouse'?'Oyuna Başla ▶':'Ellerimle Başla ✋';
   }
   async function setPaused(value:boolean){
-    if(!running||state.complete)return;
-    if(value){audio.pauseMusic();mascot.stop();companion.hidden=true;paused=true;interaction.disable();motion.disable();session.suspended=true;element('paused').hidden=false;render();renderCursors();return;}
+    if((!running||state.complete)&&!workshopActive)return;
+    if(value){audio.pauseMusic();mascot.stop();workshop.pauseVoice();companion.hidden=true;paused=true;interaction.disable();motion.disable();session.suspended=true;element('paused').hidden=false;render();renderCursors();return;}
     if(mode==='hand'&&!session.active){
       element<HTMLButtonElement>('resume').disabled=true;
-      const ready=await session.start();element<HTMLButtonElement>('resume').disabled=false;if(!ready||!running)return;
+      const ready=await session.start();element<HTMLButtonElement>('resume').disabled=false;if(!ready||!(running||workshopActive))return;
     }
-    paused=false;session.suspended=false;audio.startMusic();interaction.enable();if(mode==='hand')motion.enable();element('paused').hidden=true;companion.hidden=false;
+    paused=false;session.suspended=false;audio.startMusic();if(!workshopActive)interaction.enable();if(mode==='hand')motion.enable();element('paused').hidden=true;companion.hidden=workshopActive;
   }
   session.onFrame=frame=>{
     if(mode!=='hand')return;
@@ -207,7 +242,7 @@ export function mountGameScene(){
         if(confirmed){element<HTMLButtonElement>('setup-finish').click();return;}
       }
       element('setup-hands').textContent=frame.hands.length?`✋ ${frame.hands.length===1?'Bir elini gördük!':'İki elini gördük!'}`:'✋ Ellerini göster';
-    }else if(running&&!paused){
+    }else if((running||workshopActive)&&!paused){
       // Gesture continuity/loss uses result-arrival time. Camera timestamps are
       // retained separately for frame identity and measured pipeline age; mixing
       // them caused fresh but delayed results to be treated as missing hands.
@@ -224,8 +259,9 @@ export function mountGameScene(){
       if(preparing)showSetup('Kamera kapalı. Yeniden başlamak için menüye dön.');
     }
   };
-  element('start').onclick=()=>{void start();};element('again').onclick=()=>{void start();};
-  element('restart').onclick=()=>{if(mode==='hand'&&session.active&&calibration.stage==='ready')showInstructions();else void start();};
+  element('start').onclick=()=>{nextLevel='sorting';void start();};element('again').onclick=()=>{nextLevel='sorting';void start();};
+  element('start-workshop').onclick=()=>{nextLevel='workshop';void start();};element('to-workshop').onclick=enterWorkshop;
+  element('restart').onclick=()=>{if(workshopActive){workshop.start(collected);return;}if(mode==='hand'&&session.active&&calibration.stage==='ready')showInstructions();else void start();};
   element('home').onclick=returnToMenu;element('setup-cancel').onclick=returnToMenu;
   element('choose-mouse').onclick=()=>chooseMode('mouse');element('choose-hand').onclick=()=>chooseMode('hand');
   function finishHandSetup(){
@@ -234,12 +270,15 @@ export function mountGameScene(){
     handsReady.reset();
     motion.bounds=calibration.bounds;
     if(setupResume){preparing=false;running=true;paused=false;companion.hidden=false;session.suspended=false;audio.startMusic();interaction.enable();motion.enable();element('hand-setup').hidden=true;element('motion-preview').classList.remove('visible');}
+    else if(nextLevel==='workshop')enterWorkshop();
     else showInstructions();
   }
   element('setup-finish').onclick=finishHandSetup;
   element('recalibrate').onclick=async()=>{
     handsReady.reset();
-    if(mode!=='hand')return;setupResume=running;running=false;paused=false;preparing=true;interaction.disable();motion.disable();
+    if(mode!=='hand')return;
+    if(workshopActive){leaveWorkshop();nextLevel='workshop';}
+    setupResume=running;running=false;paused=false;preparing=true;interaction.disable();motion.disable();
     for(const id of ['menu','result','paused'])element(id).hidden=true;element('hand-setup').hidden=false;element('motion-preview').classList.add('visible');
     calibration.start();session.suspended=false;if(!session.active&&!await session.start())return;showSetup();
   };
@@ -252,10 +291,12 @@ export function mountGameScene(){
     const engine=motion.settings.method==='fist'?element<HTMLSelectElement>('gesture-engine').value as TrackingEngine:'landmarks';
     if(session.engine!==engine){session.stop();session.engine=engine;}
     if((previous==='fist')!==(motion.settings.method==='fist')){
-      calibration.reset();if(mode==='hand'&&(running||preparing)){element<HTMLButtonElement>('recalibrate').click();return;}
+      calibration.reset();if(mode==='hand'&&(running||preparing||workshopActive)){element<HTMLButtonElement>('recalibrate').click();return;}
     }
-    if(running&&!paused&&mode==='hand'&&!session.active&&!await session.start())return;
+    if((running||workshopActive)&&!paused&&mode==='hand'&&!session.active&&!await session.start())return;
+    workshop.world.brushOnHold=motion.settings.method!=='dwell';
     if(running&&!paused){interaction.enable();if(mode==='hand')motion.enable();}
+    else if(workshopActive&&!paused&&mode==='hand')motion.enable();
     render();
   }
   for(const id of ['grab-method','dwell-grab','dwell-release','motion-sensitivity','gesture-engine'])element(id).onchange=()=>{void changeSettings();};
@@ -265,7 +306,9 @@ export function mountGameScene(){
     motion.thresholds.modelEnter=Number(element<HTMLInputElement>('fist-confidence').value);
     motion.thresholds.modelKeep=Math.max(.4,motion.thresholds.modelEnter-.12);
     session.processor.stationaryMs=Number(element<HTMLInputElement>('smooth-still').value);session.processor.fastMs=Number(element<HTMLInputElement>('smooth-fast').value);session.processor.smoothing=element<HTMLInputElement>('smooth-enabled').checked;
-    if(running&&!paused){interaction.enable();if(mode==='hand')motion.enable();}render();
+    if(running&&!paused){interaction.enable();if(mode==='hand')motion.enable();}
+    else if(workshopActive&&!paused&&mode==='hand')motion.enable();
+    render();
   }
   for(const id of ['fist-confirm','fist-confidence','smooth-still','smooth-fast','smooth-enabled'])element(id).onchange=tuneGestures;
   element<HTMLInputElement>('gesture-debug').onchange=()=>{element('gesture-details').hidden=!element<HTMLInputElement>('gesture-debug').checked;};
@@ -287,6 +330,8 @@ export function mountGameScene(){
     const dt=(now-previous)/1000;previous=now;session.tick(now);
     if(introducing&&!document.hidden){introSeconds+=Math.max(0,Math.min(dt,.05));if(introSeconds>=introLimit)finishInstructions();}
     if(running&&!paused&&!state.complete){activeSeconds+=Math.max(0,Math.min(dt,.05));motion.tick(now);advance(state,dt,difficulty,interaction.heldIds);mascotDirector.tick(dt,state.objects);render();}
+    if(workshopActive&&!paused){motion.tick(now);workshop.tick(now,mode==='hand'?motion.cursors:[]);}
+    if(resultAdvanceAt&&now>=resultAdvanceAt&&!element('result').hidden)enterWorkshop();
     renderCursors();
     if(now>messageUntil)element('feedback').classList.remove('visible');
     if(now-lastMetrics>250){

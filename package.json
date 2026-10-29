@@ -11,6 +11,7 @@
     "test:tracking-browser": "node scripts/tracking-browser-test.mjs",
     "test:motion-browser": "node scripts/motion-browser-test.mjs",
     "test:fist-browser": "node scripts/fist-browser-test.mjs",
+    "test:workshop-browser": "node scripts/workshop-browser-test.mjs",
     "test:gesture-lab-browser": "node scripts/gesture-lab-browser-test.mjs",
     "test:gesture-lab-orientation-browser": "node scripts/gesture-lab-orientation-browser-test.mjs",
     "benchmark:gestures": "node --experimental-strip-types scripts/gesture-backend-benchmark.mjs"
